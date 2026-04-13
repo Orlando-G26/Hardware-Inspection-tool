@@ -629,7 +629,71 @@
                 <button class="btn-link" id="btnSkipShell">Skip &rarr; proceed with browser info only</button>
             </div>
 
-            <!-- iOS / Android path -->
+            <!-- Android manual entry -->
+            <div id="setup-android" style="display:none">
+                <div class="device-badge">🤖 Android Detected</div>
+                <h2>Enter Your Device Info</h2>
+                <p class="setup-desc">Open <strong>Settings</strong> &rarr; <strong>About Phone</strong> and fill in the details below.</p>
+
+                <div class="about-mac-card">
+                    <div class="about-mac-card-header">⚙️ Settings → About Phone — what to look for</div>
+                    <div class="about-mac-card-row"><span class="amc-key">Device name / Model number</span><span class="amc-val">MODEL</span></div>
+                    <div class="about-mac-card-row"><span class="amc-key">Android version</span><span class="amc-val">VERSION</span></div>
+                    <div class="about-mac-card-row"><span class="amc-key">Total storage / Capacity</span><span class="amc-val">STORAGE</span></div>
+                </div>
+
+                <div class="mac-fields">
+                    <div class="mac-field">
+                        <label>Device Model</label>
+                        <input type="text" id="androidModel" placeholder="e.g. Samsung Galaxy S23">
+                    </div>
+                    <div class="mac-field">
+                        <label>Android Version</label>
+                        <input type="text" id="androidVersion" placeholder="e.g. Android 14">
+                    </div>
+                    <div class="mac-field">
+                        <label>Storage / Capacity</label>
+                        <input type="text" id="androidStorage" placeholder="e.g. 128 GB">
+                    </div>
+                </div>
+
+                <button class="button" id="btnAndroidContinue">Continue to Speed Test &rarr;</button>
+                <button class="btn-link" id="btnSkipAndroid">Skip &rarr; proceed without device info</button>
+            </div>
+
+            <!-- iOS manual entry -->
+            <div id="setup-ios" style="display:none">
+                <div class="device-badge">🍎 iPhone / iPad Detected</div>
+                <h2>Enter Your Device Info</h2>
+                <p class="setup-desc">Open <strong>Settings</strong> &rarr; <strong>General</strong> &rarr; <strong>About</strong> and fill in the details below.</p>
+
+                <div class="about-mac-card">
+                    <div class="about-mac-card-header">⚙️ Settings → General → About — what to look for</div>
+                    <div class="about-mac-card-row"><span class="amc-key">Model Name</span><span class="amc-val">MODEL</span></div>
+                    <div class="about-mac-card-row"><span class="amc-key">Software Version</span><span class="amc-val">VERSION</span></div>
+                    <div class="about-mac-card-row"><span class="amc-key">Capacity</span><span class="amc-val">STORAGE</span></div>
+                </div>
+
+                <div class="mac-fields">
+                    <div class="mac-field">
+                        <label>iPhone / iPad Model</label>
+                        <input type="text" id="iosModel" placeholder="e.g. iPhone 15 Pro">
+                    </div>
+                    <div class="mac-field">
+                        <label>iOS Version</label>
+                        <input type="text" id="iosVersion" placeholder="e.g. iOS 17.4">
+                    </div>
+                    <div class="mac-field">
+                        <label>Storage / Capacity</label>
+                        <input type="text" id="iosStorage" placeholder="e.g. 256 GB">
+                    </div>
+                </div>
+
+                <button class="button" id="btnIosContinue">Continue to Speed Test &rarr;</button>
+                <button class="btn-link" id="btnSkipIos">Skip &rarr; proceed without device info</button>
+            </div>
+
+            <!-- Unknown platform fallback -->
             <div id="setup-other" style="display:none">
                 <div class="device-badge" id="setup-badge">💻 Device Detected</div>
                 <h2>Ready to Test</h2>
@@ -754,23 +818,27 @@
                 document.getElementById('setup-macos').style.display   = 'none';
                 document.getElementById('setup-shell').style.display   = 'block';
                 document.getElementById('setup-other').style.display   = 'none';
+            } else if (platform === 'Android') {
+                document.getElementById('setup-windows').style.display  = 'none';
+                document.getElementById('setup-macos').style.display    = 'none';
+                document.getElementById('setup-shell').style.display    = 'none';
+                document.getElementById('setup-android').style.display  = 'block';
+                document.getElementById('setup-ios').style.display      = 'none';
+                document.getElementById('setup-other').style.display    = 'none';
+            } else if (platform === 'iOS') {
+                document.getElementById('setup-windows').style.display  = 'none';
+                document.getElementById('setup-macos').style.display    = 'none';
+                document.getElementById('setup-shell').style.display    = 'none';
+                document.getElementById('setup-android').style.display  = 'none';
+                document.getElementById('setup-ios').style.display      = 'block';
+                document.getElementById('setup-other').style.display    = 'none';
             } else {
-                const icons  = { Android: '📱', iOS: '📱' };
-                const badges = {
-                    Android: '🤖 Android Detected',
-                    iOS:     '🍎 iPhone / iPad Detected',
-                };
-                const descs  = {
-                    Android: 'Your Android device was detected. Browser info will be collected automatically.',
-                    iOS:     'Your iPhone or iPad was detected. Browser info will be collected automatically.',
-                };
-                document.getElementById('setup-icon').textContent  = icons[platform]  || '💻';
-                document.getElementById('setup-badge').textContent = badges[platform] || '💻 Device Detected';
-                document.getElementById('setup-desc').textContent  = descs[platform]  || 'Your device info will be collected automatically from the browser.';
-                document.getElementById('setup-windows').style.display = 'none';
-                document.getElementById('setup-macos').style.display   = 'none';
-                document.getElementById('setup-shell').style.display   = 'none';
-                document.getElementById('setup-other').style.display   = 'block';
+                document.getElementById('setup-windows').style.display  = 'none';
+                document.getElementById('setup-macos').style.display    = 'none';
+                document.getElementById('setup-shell').style.display    = 'none';
+                document.getElementById('setup-android').style.display  = 'none';
+                document.getElementById('setup-ios').style.display      = 'none';
+                document.getElementById('setup-other').style.display    = 'block';
             }
 
             showScreen('screen-setup', 1);
@@ -801,6 +869,42 @@
         });
 
         document.getElementById('btnSkipMac').addEventListener('click', () => {
+            showScreen('screen-test', 2);
+        });
+
+        document.getElementById('btnAndroidContinue').addEventListener('click', () => {
+            const model   = document.getElementById('androidModel').value.trim();
+            const version = document.getElementById('androidVersion').value.trim();
+            const storage = document.getElementById('androidStorage').value.trim();
+            if (model)   _hw.model = model;
+            if (version) _hw.os    = version;
+            if (storage) _hw.ram   = storage;
+            if (model || version || storage) {
+                document.getElementById('hwBannerText').textContent = 'Device info entered manually — details will be included in results.';
+                document.getElementById('hwBanner').style.display = 'flex';
+            }
+            showScreen('screen-test', 2);
+        });
+
+        document.getElementById('btnSkipAndroid').addEventListener('click', () => {
+            showScreen('screen-test', 2);
+        });
+
+        document.getElementById('btnIosContinue').addEventListener('click', () => {
+            const model   = document.getElementById('iosModel').value.trim();
+            const version = document.getElementById('iosVersion').value.trim();
+            const storage = document.getElementById('iosStorage').value.trim();
+            if (model)   _hw.model = model;
+            if (version) _hw.os    = version;
+            if (storage) _hw.ram   = storage;
+            if (model || version || storage) {
+                document.getElementById('hwBannerText').textContent = 'Device info entered manually — details will be included in results.';
+                document.getElementById('hwBanner').style.display = 'flex';
+            }
+            showScreen('screen-test', 2);
+        });
+
+        document.getElementById('btnSkipIos').addEventListener('click', () => {
             showScreen('screen-test', 2);
         });
 
