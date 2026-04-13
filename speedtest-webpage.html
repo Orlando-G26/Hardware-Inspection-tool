@@ -433,62 +433,14 @@
 
         <!-- ── Screen 2: Setup ── -->
         <div class="screen" id="screen-setup">
-
-            <!-- Windows path -->
-            <div id="setup-windows" style="display:none">
-                <div class="device-badge">🪟 Windows Detected</div>
-                <h2>System Info Collector</h2>
-                <p class="setup-desc">
-                    To include accurate hardware details (CPU, RAM, network adapter) in your results, please run our lightweight collector script before the speed test.
-                </p>
-                <div class="setup-steps">
-                    <div class="setup-step">
-                        <div class="step-num">1</div>
-                        <div class="step-body">
-                            <div class="step-title">Download the collector script</div>
-                            <div class="step-detail">
-                                Save it in the <strong>same folder</strong> as this HTML file.
-                            </div>
-                            <a href="run-speedtest.ps1" download class="download-btn">&#x2B07; Download Script</a>
-                        </div>
-                    </div>
-                    <div class="setup-step">
-                        <div class="step-num">2</div>
-                        <div class="step-body">
-                            <div class="step-title">Run it</div>
-                            <div class="step-detail">
-                                Right-click the downloaded file &rarr; <strong>"Run with PowerShell"</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="setup-step">
-                        <div class="step-num">3</div>
-                        <div class="step-body">
-                            <div class="step-title">This page reopens automatically</div>
-                            <div class="step-detail">
-                                The script collects your system info and brings you back here ready to run the test.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button class="btn-link" id="btnSkipSetup">Skip &rarr; proceed without system info</button>
+            <div class="device-badge" id="setup-badge">💻 Device Detected</div>
+            <h2>Ready to Test</h2>
+            <div class="device-info-box">
+                <div class="big-icon" id="setup-icon">💻</div>
+                <p id="setup-desc">Your device info will be collected automatically from the browser.</p>
             </div>
-
-            <!-- Non-Windows / mobile path -->
-            <div id="setup-other" style="display:none">
-                <div class="device-badge" id="other-badge">💻 Device Detected</div>
-                <h2>Ready to Test</h2>
-                <div class="device-info-box">
-                    <div class="big-icon" id="other-icon">💻</div>
-                    <p id="other-desc">Your device info will be collected automatically from the browser.</p>
-                </div>
-                <p class="note-text">
-                    Full hardware details (exact CPU, RAM) are only available on Windows with the collector script.<br>
-                    Basic system info will still be included in your results.
-                </p>
-                <button class="button" id="btnProceedOther">Continue to Speed Test &rarr;</button>
-            </div>
-
+            <p class="note-text" id="setup-note"></p>
+            <button class="button" id="btnProceed">Continue to Speed Test &rarr;</button>
         </div>
 
         <!-- ── Screen 3: Speed Test ── -->
@@ -574,38 +526,35 @@
             return 'Unknown';
         }
 
-        // ---- Welcome: Get Started ----
-        // Windows → skip setup, go straight to test (browser detects hardware)
-        // Non-Windows → show device-detected screen before test
+        // ---- Welcome: Get Started — all platforms show device detected screen ----
         document.getElementById('btnGetStarted').addEventListener('click', async () => {
             const platform = await detectPlatform();
 
-            if (platform === 'Windows') {
-                showScreen('screen-test', 1);
-                return;
-            }
-
-            const icons  = { Android: '📱', iOS: '📱', macOS: '🍎', Linux: '🐧' };
+            const icons  = { Windows: '🪟', Android: '📱', iOS: '📱', macOS: '🍎', Linux: '🐧' };
             const badges = {
+                Windows: '🪟 Windows Detected',
                 Android: '🤖 Android Detected',
                 iOS:     '🍎 iPhone / iPad Detected',
                 macOS:   '🍎 macOS Detected',
                 Linux:   '🐧 Linux Detected',
             };
             const descs  = {
+                Windows: 'Your Windows PC was detected. System info (OS, CPU cores, RAM) will be collected automatically from the browser.',
                 Android: 'Your Android device was detected. Network and browser info will be collected automatically.',
                 iOS:     'Your iPhone or iPad was detected. Network and browser info will be collected automatically.',
                 macOS:   'Your Mac was detected. Network and browser info will be collected automatically.',
                 Linux:   'Your Linux machine was detected. Network and browser info will be collected automatically.',
             };
-            document.getElementById('other-icon').textContent  = icons[platform]  || '💻';
-            document.getElementById('other-badge').textContent = badges[platform] || '💻 Device Detected';
-            document.getElementById('other-desc').textContent  = descs[platform]  || 'Your device info will be collected automatically from the browser.';
-            document.getElementById('setup-other').style.display = 'block';
+
+            document.getElementById('setup-icon').textContent  = icons[platform]  || '💻';
+            document.getElementById('setup-badge').textContent = badges[platform] || '💻 Device Detected';
+            document.getElementById('setup-desc').textContent  = descs[platform]  || 'Your device info will be collected automatically from the browser.';
+            document.getElementById('setup-note').textContent  = '';
+
             showScreen('screen-setup', 1);
         });
 
-        document.getElementById('btnProceedOther').addEventListener('click', () => {
+        document.getElementById('btnProceed').addEventListener('click', () => {
             showScreen('screen-test', 2);
         });
 
