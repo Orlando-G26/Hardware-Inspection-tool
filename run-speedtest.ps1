@@ -5,8 +5,7 @@
 # ============================================================
 # IT ADMIN CONFIG — set this once after uploading to SharePoint
 # ============================================================
-$sharePointURL = '' # e.g. 'https://yourcompany.sharepoint.com/sites/IT/SiteAssets/speedtest-webpage.html'
-# Leave empty to use the local HTML file in the same folder (for testing).
+$sharePointURL = 'https://orlando-g26.github.io/Hardware-Inspection-tool/speedtest-webpage.html'
 # ============================================================
 
 # ---- Hardware ----
