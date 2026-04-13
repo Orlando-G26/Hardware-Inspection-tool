@@ -322,6 +322,20 @@
             word-break: break-all;
         }
 
+        .copy-btn {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 14px;
+            background: var(--oxford);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .copy-btn:hover { background: var(--metallic); }
+
         /* ── Shared buttons ── */
         .button {
             width: 100%;
@@ -511,17 +525,14 @@
                 <div class="setup-steps">
                     <div class="setup-step">
                         <div class="step-num">1</div>
-                        <div class="step-body">
-                            <div class="step-title">Download the launcher</div>
-                            <div class="step-detail">Save it to your Downloads folder.</div>
-                            <a id="shellDownloadBtn" href="run-speedtest.command" download class="download-btn">&#x2B07; Download Launcher</a>
+                        <div class="step-body" id="shellStep1Body">
+                            <!-- populated by JS -->
                         </div>
                     </div>
                     <div class="setup-step">
                         <div class="step-num">2</div>
-                        <div class="step-body">
-                            <div class="step-title" id="shellStep2Title">Double-click to run</div>
-                            <div class="step-detail" id="shellStep2Detail">If macOS warns, right-click &rarr; <strong>Open</strong> &rarr; <strong>Open</strong>.</div>
+                        <div class="step-body" id="shellStep2Body">
+                            <!-- populated by JS -->
                         </div>
                     </div>
                     <div class="setup-step">
@@ -643,17 +654,35 @@
                 const shellBadges = { macOS: '🍎 macOS Detected', Linux: '🐧 Linux Detected' };
                 document.getElementById('setup-shell-badge').textContent = shellBadges[platform] || '💻 Device Detected';
 
-                const btn = document.getElementById('shellDownloadBtn');
+                const s1 = document.getElementById('shellStep1Body');
+                const s2 = document.getElementById('shellStep2Body');
+
                 if (platform === 'macOS') {
-                    btn.href = 'run-speedtest.command';
-                    btn.download = 'run-speedtest.command';
-                    document.getElementById('shellStep2Title').textContent  = 'Double-click to run';
-                    document.getElementById('shellStep2Detail').innerHTML   = 'If macOS warns, right-click &rarr; <strong>Open</strong> &rarr; <strong>Open</strong>.';
+                    const curlCmd = 'bash <(curl -fsSL https://orlando-g26.github.io/Hardware-Inspection-tool/run-speedtest.sh)';
+                    s1.innerHTML = `
+                        <div class="step-title">Copy this command</div>
+                        <div class="step-detail">
+                            <code>${curlCmd}</code><br>
+                            <button class="copy-btn" id="btnCopyCmd">Copy</button>
+                        </div>`;
+                    s2.innerHTML = `
+                        <div class="step-title">Open Terminal and paste</div>
+                        <div class="step-detail">Press <strong>Return</strong> to run.</div>`;
+                    document.getElementById('btnCopyCmd').addEventListener('click', () => {
+                        navigator.clipboard.writeText(curlCmd).then(() => {
+                            const b = document.getElementById('btnCopyCmd');
+                            b.textContent = 'Copied!';
+                            setTimeout(() => { b.textContent = 'Copy'; }, 2000);
+                        });
+                    });
                 } else {
-                    btn.href = 'run-speedtest.sh';
-                    btn.download = 'run-speedtest.sh';
-                    document.getElementById('shellStep2Title').textContent  = 'Run it in Terminal';
-                    document.getElementById('shellStep2Detail').innerHTML   = 'Open Terminal and paste:<br><code>bash ~/Downloads/run-speedtest.sh</code>';
+                    s1.innerHTML = `
+                        <div class="step-title">Download the script</div>
+                        <div class="step-detail">Save it to your Downloads folder.</div>
+                        <a href="run-speedtest.sh" download class="download-btn">&#x2B07; Download Script</a>`;
+                    s2.innerHTML = `
+                        <div class="step-title">Run it in Terminal</div>
+                        <div class="step-detail">Open Terminal and paste:<br><code>bash ~/Downloads/run-speedtest.sh</code></div>`;
                 }
 
                 document.getElementById('setup-windows').style.display = 'none';
