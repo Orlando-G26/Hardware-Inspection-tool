@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell.exe -ExecutionPolicy Bypass -NoProfile -File \"run-speedtest.ps1\")",
+      "Bash(powershell.exe:*)",
+      "Bash(del:*)",
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "Bash(where python3:*)",
+      "Bash(where python:*)",
+      "Bash(where py:*)",
+      "Bash(C:\\\\Users\\\\OrlandoGutierrez\\\\AppData\\\\Local\\\\Python\\\\bin\\\\python3.exe:*)",
+      "Bash(date /t)",
+      "Bash(time /t)",
+      "Bash(powershell:*)",
+      "WebSearch",
+      "WebFetch(domain:librespeed.org)",
+      "WebFetch(domain:www.measurementlab.net)",
+      "Bash(claude --version)",
+      "Bash(npm list:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(/c/Users/OrlandoGutierrez/AppData/Local/Python/bin/python3.exe:*)",
+      "Bash(gh auth:*)"
+    ]
+  }
+}

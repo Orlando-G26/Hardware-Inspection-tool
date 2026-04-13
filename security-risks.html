@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Risk Assessment — Transpro Network Speed Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f8;
+            color: #333;
+            padding: 40px 20px 60px;
+        }
+
+        /* Header */
+        .report-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 48px 48px 40px;
+            max-width: 900px;
+            margin: 0 auto 40px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .report-header::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 220px; height: 220px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 50%;
+        }
+        .report-header::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -40px;
+            width: 280px; height: 280px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .header-tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .report-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .report-header p {
+            font-size: 15px;
+            opacity: 0.85;
+            position: relative;
+            z-index: 1;
+        }
+        .header-meta {
+            margin-top: 28px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 13px;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            max-width: 900px;
+            margin: 0 auto 40px;
+        }
+        .summary-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        }
+        .summary-card .count {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .summary-card .label {
+            font-size: 13px;
+            color: #888;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+        .count.high   { color: #e53935; }
+        .count.medium { color: #f57c00; }
+        .count.low    { color: #43a047; }
+
+        /* Section Title */
+        .section-title {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #999;
+            padding-left: 4px;
+        }
+
+        /* Risk Cards */
+        .cards-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .risk-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .risk-card:hover { box-shadow: 0 6px 28px rgba(0,0,0,0.12); }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 22px 28px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .risk-icon {
+            width: 46px; height: 46px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .risk-icon.high   { background: #fdecea; }
+        .risk-icon.medium { background: #fff3e0; }
+        .risk-icon.low    { background: #e8f5e9; }
+        .risk-icon.legal  { background: #e3f2fd; }
+
+        .card-title-area { flex: 1; }
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #222;
+        }
+        .card-subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .severity-badge {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .severity-badge.high   { background: #fdecea; color: #c62828; }
+        .severity-badge.medium { background: #fff3e0; color: #e65100; }
+        .severity-badge.low    { background: #e8f5e9; color: #2e7d32; }
+        .severity-badge.legal  { background: #e3f2fd; color: #1565c0; }
+
+        .chevron {
+            font-size: 12px;
+            color: #bbb;
+            transition: transform 0.25s;
+            flex-shrink: 0;
+        }
+        .risk-card.open .chevron { transform: rotate(180deg); }
+
+        .card-body {
+            display: none;
+            padding: 0 28px 28px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .risk-card.open .card-body { display: block; }
+
+        .body-section { margin-top: 20px; }
+        .body-section h3 {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+        .body-section p, .body-section li {
+            font-size: 14px;
+            line-height: 1.7;
+            color: #444;
+        }
+        .body-section ul {
+            padding-left: 18px;
+        }
+        .body-section li { margin-bottom: 6px; }
+
+        .code-block {
+            background: #f7f8fc;
+            border: 1px solid #e8eaf0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+            font-size: 12.5px;
+            color: #444;
+            margin-top: 10px;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+
+        .links { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .links a {
+            font-size: 12px;
+            color: #667eea;
+            text-decoration: none;
+            background: #f0f2ff;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .links a:hover { background: #e0e4ff; }
+
+        .note-box {
+            background: #fffbea;
+            border-left: 3px solid #f59e0b;
+            border-radius: 0 8px 8px 0;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #78530a;
+            margin-top: 12px;
+            line-height: 1.6;
+        }
+
+        /* Summary Table */
+        .table-wrapper {
+            max-width: 900px;
+            margin: 40px auto 0;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+        }
+        .table-title {
+            padding: 20px 28px 16px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left;
+            padding: 12px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #aaa;
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        td {
+            padding: 14px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid #f8f8f8;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafbff; }
+
+        .footer {
+            max-width: 900px;
+            margin: 32px auto 0;
+            text-align: center;
+            font-size: 13px;
+            color: #bbb;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="report-header">
+    <div class="header-tag">Security Assessment</div>
+    <h1>Transpro Network Speed Test<br>Security Risk Report</h1>
+    <p>Static analysis of all project files: HTML tool, PowerShell collector, and generated data file.</p>
+    <div class="header-meta">
+        <div class="meta-item">📅 April 2, 2026</div>
+        <div class="meta-item">📁 speedtest-webpage.html</div>
+        <div class="meta-item">📁 run-speedtest.ps1</div>
+        <div class="meta-item">📁 hw-data.js</div>
+        <div class="meta-item">🔴 3 High &nbsp; 🟠 4 Medium &nbsp; 🟢 4 Low</div>
+    </div>
+</div>
+
+<!-- ── Summary Cards ── -->
+<div class="summary-grid">
+    <div class="summary-card">
+        <div class="count high">3</div>
+        <div class="label">High Severity</div>
+    </div>
+    <div class="summary-card">
+        <div class="count medium">4</div>
+        <div class="label">Medium Severity</div>
+    </div>
+    <div class="summary-card">
+        <div class="count low">4</div>
+        <div class="label">Low / Legal</div>
+    </div>
+</div>
+
+<!-- ── HIGH ── -->
+<div class="section-title">High Severity</div>
+<div class="cards-wrapper">
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon high">🔑</div>
+            <div class="card-title-area">
+                <div class="card-title">Webhook URL Exposed in Client-Side Code</div>
+                <div class="card-subtitle">speedtest-webpage.html — CONFIG.webhookURL</div>
+            </div>
+            <span class="severity-badge high">High</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p>The Power Automate webhook URL is hardcoded inside <code>speedtest-webpage.html</code> inside the <code>CONFIG</code> object. Anyone who opens the browser's View Source or DevTools can read it instantly. The URL is currently empty — but this will become a live risk the moment it is configured.</p>
+            </div>
+            <div class="note-box">⚠️ The webhook is currently disabled (<code>webhookURL: ''</code>). This risk activates as soon as a real URL is pasted in.</div>
+            <div class="body-section">
+                <h3>Risk</h3>
+                <ul>
+                    <li>Anyone can extract the URL and POST fake results — spoofed names, emails, speeds.</li>
+                    <li>Automated scripts can flood your Power Automate flow and exhaust execution quotas.</li>
+                    <li>The URL structure reveals internal workflow IDs and environment details.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Create a lightweight server-side proxy (Azure Function, Node.js) that holds the webhook URL and only forwards requests that include a valid shared token.</li>
+                    <li>Add a <code>X-Transpro-Token</code> header to every submission and validate it on the proxy before forwarding.</li>
+                    <li>Rotate the webhook URL periodically; restrict inbound IPs on the Power Automate side if supported.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>References</h3>
+                <div class="links">
+                    <a href="https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html" target="_blank">OWASP Secrets Management</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon high">🔓</div>
+            <div class="card-title-area">
+                <div class="card-title">No Authentication — Open to Anyone</div>
+                <div class="card-subtitle">speedtest-webpage.html — form has no identity verification</div>
+            </div>
+            <span class="severity-badge high">High</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p>The form accepts any name and email with no verification. There is no login, SSO check, or token gate. Anyone who has the file — or a copy of it — can submit results as any employee.</p>
+            </div>
+            <div class="body-section">
+                <h3>Risk</h3>
+                <ul>
+                    <li>Fake or malicious submissions pollute your diagnostic data with fabricated results.</li>
+                    <li>No way to guarantee the person running the test is the person named in the form.</li>
+                    <li>If the HTML file is shared publicly or emailed widely, external parties can submit results.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Integrate with Azure Active Directory / Entra ID so only authenticated Transpro accounts can access and submit the form.</li>
+                    <li>As a lighter alternative, IT generates single-use tokens (e.g., a GUID) and emails one to each employee before they run the test — the form requires the token to submit.</li>
+                    <li>At minimum, the Power Automate flow should cross-reference the submitted email against your employee directory before storing the result.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>References</h3>
+                <div class="links">
+                    <a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank">OWASP Authentication</a>
+                    <a href="https://owasp.org/www-project-top-ten/" target="_blank">OWASP Top 10 — A07</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon high">💉</div>
+            <div class="card-title-area">
+                <div class="card-title">XSS via innerHTML with External Data</div>
+                <div class="card-subtitle">speedtest-webpage.html — displayResults(), row() helper</div>
+            </div>
+            <span class="severity-badge high">High</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p>The <code>displayResults()</code> function builds the results panel by assigning template literals directly to <code>results.innerHTML</code>. Values from two external sources — <code>ipapi.co</code> (ISP name, city, country) and <code>hw-data.js</code> (CPU, OS, machine model) — are embedded without HTML-escaping.</p>
+                <div class="code-block">// Vulnerable pattern — data.isp comes from ipapi.co
+results.innerHTML = `&lt;span&gt;${data.isp}&lt;/span&gt;`;</div>
+            </div>
+            <div class="body-section">
+                <h3>Risk</h3>
+                <ul>
+                    <li>If <code>ipapi.co</code> is compromised or a man-in-the-middle intercepts the response, a malicious ISP value like <code>&lt;img src=x onerror="stealData()"&gt;</code> executes in the user's browser.</li>
+                    <li>If <code>hw-data.js</code> is tampered with (e.g., on a shared drive), injected HTML in the CPU or model field runs directly when results are displayed.</li>
+                    <li>Chained with the missing CSP (risk #10), an injected script has full page access.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Replace <code>innerHTML</code> assignments with DOM methods that treat values as plain text — use <code>textContent</code> for all external values.</li>
+                    <li>Or run all external values through an escape function before inserting:</li>
+                </ul>
+                <div class="code-block">function escHtml(str) {
+  return String(str)
+    .replace(/&amp;/g,'&amp;amp;').replace(/&lt;/g,'&amp;lt;')
+    .replace(/&gt;/g,'&amp;gt;').replace(/"/g,'&amp;quot;');
+}</div>
+                <ul style="margin-top:10px">
+                    <li>Validate <code>ipapi.co</code> responses against an expected schema before using any field.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>References</h3>
+                <div class="links">
+                    <a href="https://owasp.org/www-community/attacks/xss/" target="_blank">OWASP XSS</a>
+                    <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html" target="_blank">XSS Prevention Cheat Sheet</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /HIGH -->
+
+<!-- ── MEDIUM ── -->
+<div class="section-title" style="margin-top:40px">Medium Severity</div>
+<div class="cards-wrapper">
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon medium">🗂️</div>
+            <div class="card-title-area">
+                <div class="card-title">hw-data.js Persists Sensitive System Info on Disk</div>
+                <div class="card-subtitle">run-speedtest.ps1 writes hw-data.js alongside the HTML</div>
+            </div>
+            <span class="severity-badge medium">Medium</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p>Every time <code>run-speedtest.bat</code> is executed, the PowerShell script overwrites <code>hw-data.js</code> in the project folder with the current machine's CPU model, exact RAM, OS build number, machine model, and network adapter details. This file remains on disk indefinitely after the test.</p>
+                <div class="code-block">// hw-data.js after a run — sits on disk until next run overwrites it
+window._hwData = {
+  cpu: "Intel(R) Core(TM) i5-10400T CPU @ 2.00GHz (6C / 12T)",
+  ram: "32 GB",
+  os:  "Microsoft Windows 11 Business (Build 26200)",
+  model: "LENOVO 11DUS94400",
+  netType: "Ethernet", netSpeed: "1 Gbps", ...
+};</div>
+            </div>
+            <div class="body-section">
+                <h3>Risk</h3>
+                <ul>
+                    <li>If the project folder is on a shared drive, any user with read access can see the last machine's hardware profile.</li>
+                    <li>If <code>hw-data.js</code> is accidentally committed to version control or emailed, machine fingerprint data leaks.</li>
+                    <li>An attacker with write access to the folder can inject malicious JS into <code>hw-data.js</code>, which the HTML will execute as a script tag (see XSS risk above).</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Add <code>hw-data.js</code> to <code>.gitignore</code> immediately to prevent accidental commits.</li>
+                    <li>Have the PS script delete <code>hw-data.js</code> after the browser finishes loading (e.g., after a short delay, or use a file watcher).</li>
+                    <li>Restrict folder permissions so only the running user can write to the project directory.</li>
+                    <li>Validate <code>window._hwData</code> fields against an expected schema/character allowlist before using them in the HTML.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon medium">🚫</div>
+            <div class="card-title-area">
+                <div class="card-title">No Rate Limiting — Spam / Flood Risk</div>
+                <div class="card-subtitle">speedtest-webpage.html — runSpeedTest() has no submission cooldown</div>
+            </div>
+            <span class="severity-badge medium">Medium</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p>There is no limit on how many times the form can be submitted. The "Run Another Test" button re-enables immediately after each test. Client-side button disabling is trivially bypassed via browser DevTools or scripting.</p>
+            </div>
+            <div class="body-section">
+                <h3>Risk</h3>
+                <ul>
+                    <li>An automated script can submit hundreds of fake results per minute to Power Automate.</li>
+                    <li>Power Automate has monthly execution limits — a flood can exhaust your plan quota and drop real submissions.</li>
+                    <li>Garbage data degrades the reliability of IT diagnostics.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Add a client-side cooldown: after a successful submission, disable the button for 5 minutes and show a countdown.</li>
+                    <li>Implement server-side rate limiting on the proxy (if one is added for risk #1) — e.g., max 3 submissions per IP per hour.</li>
+                    <li>Add Cloudflare Turnstile or Google reCAPTCHA v3 to block automated submissions without requiring user interaction.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>References</h3>
+                <div class="links">
+                    <a href="https://cheatsheetseries.owasp.org/cheatsheets/Denial_of_Service_Cheat_Sheet.html" target="_blank">OWASP DoS Prevention</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon medium">✏️</div>
+            <div class="card-title-area">
+                <div class="card-title">No Input Validation or Sanitization</div>
+                <div class="card-subtitle">speedtest-webpage.html — form fields sent raw to webhook</div>
+            </div>
+            <span class="severity-badge medium">Medium</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p>Name, email, department, and location are sent verbatim to the webhook with no server-side validation. The browser's <code>required</code> and <code>type="email"</code> attributes are the only checks — both are trivially bypassed by editing the DOM or sending a raw HTTP request.</p>
+            </div>
+            <div class="body-section">
+                <h3>Risk</h3>
+                <ul>
+                    <li>Malicious content in fields (script tags, SQL fragments, formula injection) propagates into Power Automate and wherever it writes data — SharePoint, Excel, Dataverse.</li>
+                    <li>If results are exported to CSV and opened in Excel, a name field like <code>=CMD|'/c calc'!A0</code> triggers formula injection.</li>
+                    <li>Oversized inputs can cause unexpected behavior in downstream systems.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Validate and sanitize all inputs server-side — never trust client-side checks alone.</li>
+                    <li>Enforce character allowlists for name and location (letters, spaces, hyphens, apostrophes only) and enforce a max length.</li>
+                    <li>Strip or encode any HTML and formula-trigger characters (<code>&lt;</code>, <code>&gt;</code>, <code>=</code>, <code>+</code>, <code>@</code>) before writing to any data store.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>References</h3>
+                <div class="links">
+                    <a href="https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html" target="_blank">OWASP Input Validation</a>
+                    <a href="https://owasp.org/www-project-top-ten/" target="_blank">OWASP Top 10 — A03 Injection</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon medium">🌐</div>
+            <div class="card-title-area">
+                <div class="card-title">Third-Party Dependency on ipapi.co</div>
+                <div class="card-subtitle">speedtest-webpage.html — getUserIP() fetches https://ipapi.co/json/</div>
+            </div>
+            <span class="severity-badge medium">Medium</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p>Every time the test runs, the user's real public IP address is sent to <code>ipapi.co</code>, a third-party commercial service, to retrieve ISP, city, region, and country. You have no control over what ipapi.co does with this data.</p>
+            </div>
+            <div class="body-section">
+                <h3>Risk</h3>
+                <ul>
+                    <li>Employee IP addresses and inferred locations are shared with an external service with no data processing agreement in place.</li>
+                    <li>If ipapi.co is down or rate-limits your requests (free tier limit applies), the entire test fails to collect IP/ISP data silently.</li>
+                    <li>A compromised or malicious response from ipapi.co feeds directly into the XSS vulnerability (risk #3).</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Route IP lookups through your own backend (Azure Function) using a self-hosted database like MaxMind GeoLite2 — no employee IP data leaves your infrastructure.</li>
+                    <li>If a third-party service is acceptable, at minimum validate and sanitize every field in the response before using it.</li>
+                    <li>Sign a Data Processing Agreement (DPA) with ipapi.co if employee data is involved and PIPEDA/GDPR compliance is required.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>References</h3>
+                <div class="links">
+                    <a href="https://cheatsheetseries.owasp.org/cheatsheets/Third_Party_Javascript_Management_Cheat_Sheet.html" target="_blank">OWASP Third-Party JS</a>
+                    <a href="https://owasp.org/www-project-top-ten/" target="_blank">OWASP Top 10 — A08</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /MEDIUM -->
+
+<!-- ── LOW ── -->
+<div class="section-title" style="margin-top:40px">Low / Legal</div>
+<div class="cards-wrapper">
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon medium">⚙️</div>
+            <div class="card-title-area">
+                <div class="card-title">PowerShell ExecutionPolicy Bypass</div>
+                <div class="card-subtitle">run-speedtest.bat — launches PS1 with -ExecutionPolicy Bypass</div>
+            </div>
+            <span class="severity-badge low">Low</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p><code>run-speedtest.bat</code> invokes PowerShell with <code>-ExecutionPolicy Bypass</code> to run <code>run-speedtest.ps1</code>, which is unsigned. This bypasses the PowerShell execution policy that organizations use as a defense against unauthorized script execution.</p>
+                <div class="code-block">powershell.exe -ExecutionPolicy Bypass -NoProfile -File "%~dp0run-speedtest.ps1"</div>
+            </div>
+            <div class="body-section">
+                <h3>Risk</h3>
+                <ul>
+                    <li>If an attacker replaces <code>run-speedtest.ps1</code> with a malicious script (e.g., on a shared drive), the bat will run it with bypass — no execution policy check will stop it.</li>
+                    <li>In environments with enforced <code>AllSigned</code> or <code>RemoteSigned</code> policy, this directly violates the corporate security baseline.</li>
+                    <li>Teaches employees to bypass security prompts, which is poor security hygiene.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Code-sign <code>run-speedtest.ps1</code> with your organization's code signing certificate — then remove the <code>-ExecutionPolicy Bypass</code> flag.</li>
+                    <li>Restrict write access to the project folder so only IT admins can modify the PS1 file.</li>
+                    <li>As an alternative, set the execution policy on managed machines to <code>RemoteSigned</code> and sign the script accordingly.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>References</h3>
+                <div class="links">
+                    <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies" target="_blank">PowerShell Execution Policies</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon legal">📋</div>
+            <div class="card-title-area">
+                <div class="card-title">No Privacy Notice or Data Consent</div>
+                <div class="card-subtitle">speedtest-webpage.html — form collects PII with no disclosure</div>
+            </div>
+            <span class="severity-badge legal">Legal</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p>The form collects name, email, public IP, ISP, browser fingerprint, OS version, CPU model, and RAM — but displays no privacy notice explaining what is collected, why, how long it is stored, or who has access.</p>
+            </div>
+            <div class="body-section">
+                <h3>Risk</h3>
+                <ul>
+                    <li>Under <strong>PIPEDA</strong> (Canada), organizations must inform individuals about the personal information collected and obtain meaningful consent before collecting it.</li>
+                    <li>If any employees are EU-based, <strong>GDPR</strong> requires explicit, informed consent prior to collecting personal data including IP addresses and device identifiers.</li>
+                    <li>Non-compliance can result in regulatory investigation, fines, and reputational damage.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Add a short disclosure above the form: <em>"This test collects your name, email, IP address, ISP, and device information. Results are stored by Transpro IT and used solely for network diagnostics."</em></li>
+                    <li>Add a required checkbox: <em>"I understand and consent to the collection of this data."</em></li>
+                    <li>Consult your legal/compliance team to confirm jurisdiction-specific requirements.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>References</h3>
+                <div class="links">
+                    <a href="https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/" target="_blank">PIPEDA — Canada</a>
+                    <a href="https://gdpr.eu/what-is-gdpr/" target="_blank">GDPR — Europe</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon low">🔒</div>
+            <div class="card-title-area">
+                <div class="card-title">No HTTPS Enforcement</div>
+                <div class="card-subtitle">speedtest-webpage.html — no transport security check</div>
+            </div>
+            <span class="severity-badge low">Low</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p>The tool currently runs as a local <code>file://</code> page, which avoids HTTP-level interception. However, if the file is ever moved to an HTTP web server (intranet, SharePoint, etc.) without TLS, all data transmits in cleartext.</p>
+            </div>
+            <div class="body-section">
+                <h3>Risk</h3>
+                <ul>
+                    <li>An attacker on the same network can intercept form submissions and read employee names, emails, IPs, and hardware details in plaintext.</li>
+                    <li>The webhook POST containing all collected data would also be visible in plaintext.</li>
+                    <li>Modern browsers block mixed-content requests — an HTTP page cannot POST to an HTTPS webhook, breaking functionality.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Host the page on an HTTPS endpoint only — Azure Static Web Apps, SharePoint, or any TLS-enabled server.</li>
+                    <li>Add an HTTP-to-HTTPS redirect check at page load:</li>
+                </ul>
+                <div class="code-block">if (location.protocol === 'http:')
+  location.replace('https:' + location.href.substring(5));</div>
+            </div>
+            <div class="body-section">
+                <h3>References</h3>
+                <div class="links">
+                    <a href="https://owasp.org/www-project-top-ten/" target="_blank">OWASP Top 10 — A02 Cryptographic Failures</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="risk-card">
+        <div class="card-header" onclick="toggle(this)">
+            <div class="risk-icon low">🛡️</div>
+            <div class="card-title-area">
+                <div class="card-title">No Content Security Policy (CSP)</div>
+                <div class="card-subtitle">speedtest-webpage.html — no script/connect restrictions</div>
+            </div>
+            <span class="severity-badge low">Low</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="body-section">
+                <h3>Problem</h3>
+                <p>There are no CSP headers or meta tags restricting which scripts, connections, or resources the page can load. Without CSP, the XSS vulnerability (risk #3) has maximum blast radius — an injected script can load external resources, exfiltrate data, and contact any domain.</p>
+            </div>
+            <div class="body-section">
+                <h3>Recommended Fixes</h3>
+                <ul>
+                    <li>Add a <code>&lt;meta&gt;</code> CSP tag in <code>&lt;head&gt;</code> whitelisting only the origins the page requires:</li>
+                </ul>
+                <div class="code-block">&lt;meta http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               script-src 'self' 'unsafe-inline';
+               connect-src https://ipapi.co
+                           https://speed.cloudflare.com
+                           https://YOUR-WEBHOOK-DOMAIN;
+               style-src 'self' 'unsafe-inline';"&gt;</div>
+                <ul style="margin-top:10px">
+                    <li>Remove <code>'unsafe-inline'</code> for scripts by moving all JS to an external file and using a nonce or hash instead.</li>
+                    <li>Prefer setting CSP as an HTTP response header (stronger than meta tag) if hosting on a web server.</li>
+                </ul>
+            </div>
+            <div class="body-section">
+                <h3>References</h3>
+                <div class="links">
+                    <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP" target="_blank">MDN — CSP</a>
+                    <a href="https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html" target="_blank">OWASP CSP Cheat Sheet</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /LOW -->
+
+<!-- ── Summary Table ── -->
+<div class="table-wrapper">
+    <div class="table-title">Risk Summary</div>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Risk</th>
+                <th>File</th>
+                <th>Severity</th>
+                <th>Quick Win</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>Webhook URL in source code</td><td>speedtest-webpage.html</td><td><span class="severity-badge high">High</span></td><td>Server-side proxy + token</td></tr>
+            <tr><td>2</td><td>No authentication</td><td>speedtest-webpage.html</td><td><span class="severity-badge high">High</span></td><td>SSO / one-time access token</td></tr>
+            <tr><td>3</td><td>XSS via innerHTML</td><td>speedtest-webpage.html</td><td><span class="severity-badge high">High</span></td><td>Use <code>textContent</code> + escape fn</td></tr>
+            <tr><td>4</td><td>hw-data.js persists system info on disk</td><td>hw-data.js / run-speedtest.ps1</td><td><span class="severity-badge medium">Medium</span></td><td>Delete file post-load + .gitignore</td></tr>
+            <tr><td>5</td><td>No rate limiting</td><td>speedtest-webpage.html</td><td><span class="severity-badge medium">Medium</span></td><td>Cooldown timer + CAPTCHA</td></tr>
+            <tr><td>6</td><td>No input validation</td><td>speedtest-webpage.html</td><td><span class="severity-badge medium">Medium</span></td><td>Server-side sanitization</td></tr>
+            <tr><td>7</td><td>Third-party ipapi.co dependency</td><td>speedtest-webpage.html</td><td><span class="severity-badge medium">Medium</span></td><td>Backend IP lookup proxy</td></tr>
+            <tr><td>8</td><td>PowerShell ExecutionPolicy Bypass</td><td>run-speedtest.bat</td><td><span class="severity-badge low">Low</span></td><td>Code-sign the PS1 script</td></tr>
+            <tr><td>9</td><td>No privacy notice / consent</td><td>speedtest-webpage.html</td><td><span class="severity-badge legal">Legal</span></td><td>Add disclosure + consent checkbox</td></tr>
+            <tr><td>10</td><td>No HTTPS enforcement</td><td>speedtest-webpage.html</td><td><span class="severity-badge low">Low</span></td><td>Host on HTTPS only</td></tr>
+            <tr><td>11</td><td>No Content Security Policy</td><td>speedtest-webpage.html</td><td><span class="severity-badge low">Low</span></td><td>Add CSP meta tag</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="footer">For questions contact your IT Security team &nbsp;·&nbsp; Transpro IT &nbsp;·&nbsp; April 2026</div>
+
+<script>
+    function toggle(header) {
+        header.parentElement.classList.toggle('open');
+    }
+</script>
+</body>
+</html>
