@@ -410,6 +410,7 @@
         <div class="step-indicator">
             <div class="step-dot" id="dot-0"></div>
             <div class="step-dot" id="dot-1"></div>
+            <div class="step-dot" id="dot-2"></div>
         </div>
 
         <!-- ── Screen 1: Welcome ── -->
@@ -541,7 +542,7 @@
 
         // ---- Step indicator ----
         function setStep(index) {
-            [0, 1].forEach(i => {
+            [0, 1, 2].forEach(i => {
                 const d = document.getElementById('dot-' + i);
                 d.classList.remove('active', 'done');
                 if (i < index)        d.classList.add('done');
@@ -573,9 +574,39 @@
             return 'Unknown';
         }
 
-        // ---- Welcome: Get Started — skip setup, detect everything in browser ----
-        document.getElementById('btnGetStarted').addEventListener('click', () => {
-            showScreen('screen-test', 1);
+        // ---- Welcome: Get Started ----
+        // Windows → skip setup, go straight to test (browser detects hardware)
+        // Non-Windows → show device-detected screen before test
+        document.getElementById('btnGetStarted').addEventListener('click', async () => {
+            const platform = await detectPlatform();
+
+            if (platform === 'Windows') {
+                showScreen('screen-test', 1);
+                return;
+            }
+
+            const icons  = { Android: '📱', iOS: '📱', macOS: '🍎', Linux: '🐧' };
+            const badges = {
+                Android: '🤖 Android Detected',
+                iOS:     '🍎 iPhone / iPad Detected',
+                macOS:   '🍎 macOS Detected',
+                Linux:   '🐧 Linux Detected',
+            };
+            const descs  = {
+                Android: 'Your Android device was detected. Network and browser info will be collected automatically.',
+                iOS:     'Your iPhone or iPad was detected. Network and browser info will be collected automatically.',
+                macOS:   'Your Mac was detected. Network and browser info will be collected automatically.',
+                Linux:   'Your Linux machine was detected. Network and browser info will be collected automatically.',
+            };
+            document.getElementById('other-icon').textContent  = icons[platform]  || '💻';
+            document.getElementById('other-badge').textContent = badges[platform] || '💻 Device Detected';
+            document.getElementById('other-desc').textContent  = descs[platform]  || 'Your device info will be collected automatically from the browser.';
+            document.getElementById('setup-other').style.display = 'block';
+            showScreen('screen-setup', 1);
+        });
+
+        document.getElementById('btnProceedOther').addEventListener('click', () => {
+            showScreen('screen-test', 2);
         });
 
         // ---- Hardware data passed via URL params by run-speedtest.ps1 ----
@@ -592,7 +623,7 @@
                 if (Object.keys(_hw).length > 0) {
                     document.getElementById('hwBanner').style.display = 'flex';
                 }
-                showScreen('screen-test', 1);
+                showScreen('screen-test', 2);
             } else {
                 showScreen('screen-welcome', 0);
             }
