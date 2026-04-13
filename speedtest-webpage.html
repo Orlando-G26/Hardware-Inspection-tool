@@ -512,16 +512,16 @@
                     <div class="setup-step">
                         <div class="step-num">1</div>
                         <div class="step-body">
-                            <div class="step-title">Download the script</div>
+                            <div class="step-title">Download the launcher</div>
                             <div class="step-detail">Save it to your Downloads folder.</div>
-                            <a href="run-speedtest.sh" download class="download-btn">&#x2B07; Download Script</a>
+                            <a id="shellDownloadBtn" href="run-speedtest.command" download class="download-btn">&#x2B07; Download Launcher</a>
                         </div>
                     </div>
                     <div class="setup-step">
                         <div class="step-num">2</div>
                         <div class="step-body">
-                            <div class="step-title">Run it in Terminal</div>
-                            <div class="step-detail">Open Terminal and paste:<br><code>bash ~/Downloads/run-speedtest.sh</code></div>
+                            <div class="step-title" id="shellStep2Title">Double-click to run</div>
+                            <div class="step-detail" id="shellStep2Detail">If macOS warns, right-click &rarr; <strong>Open</strong> &rarr; <strong>Open</strong>.</div>
                         </div>
                     </div>
                     <div class="setup-step">
@@ -642,6 +642,20 @@
             } else if (platform === 'macOS' || platform === 'Linux') {
                 const shellBadges = { macOS: '🍎 macOS Detected', Linux: '🐧 Linux Detected' };
                 document.getElementById('setup-shell-badge').textContent = shellBadges[platform] || '💻 Device Detected';
+
+                const btn = document.getElementById('shellDownloadBtn');
+                if (platform === 'macOS') {
+                    btn.href = 'run-speedtest.command';
+                    btn.download = 'run-speedtest.command';
+                    document.getElementById('shellStep2Title').textContent  = 'Double-click to run';
+                    document.getElementById('shellStep2Detail').innerHTML   = 'If macOS warns, right-click &rarr; <strong>Open</strong> &rarr; <strong>Open</strong>.';
+                } else {
+                    btn.href = 'run-speedtest.sh';
+                    btn.download = 'run-speedtest.sh';
+                    document.getElementById('shellStep2Title').textContent  = 'Run it in Terminal';
+                    document.getElementById('shellStep2Detail').innerHTML   = 'Open Terminal and paste:<br><code>bash ~/Downloads/run-speedtest.sh</code>';
+                }
+
                 document.getElementById('setup-windows').style.display = 'none';
                 document.getElementById('setup-shell').style.display   = 'block';
                 document.getElementById('setup-other').style.display   = 'none';
