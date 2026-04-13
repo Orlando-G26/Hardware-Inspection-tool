@@ -118,5 +118,3 @@ if ($browserExe) {
     Start-Process $targetURL
 }
 
-Write-Host "Done. Browser should have opened." -ForegroundColor Green
-Read-Host "Press Enter to close"
