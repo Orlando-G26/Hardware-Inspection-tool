@@ -336,6 +336,52 @@
         }
         .copy-btn:hover { background: var(--metallic); }
 
+        /* ── macOS manual entry ── */
+        .about-mac-card {
+            background: var(--platinum);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin: 14px 0 18px;
+            font-size: 13px;
+        }
+        .about-mac-card-header {
+            font-weight: 700;
+            color: var(--oxford);
+            font-size: 13px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #ddd;
+        }
+        .about-mac-card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            color: #555;
+        }
+        .about-mac-card-row .amc-key { color: var(--oxford); font-weight: 600; }
+        .about-mac-card-row .amc-val {
+            color: var(--metallic);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .mac-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .mac-field label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--oxford);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         /* ── Shared buttons ── */
         .button {
             width: 100%;
@@ -517,6 +563,43 @@
                 <button class="btn-link" id="btnSkipSetup">Skip &rarr; proceed with browser info only</button>
             </div>
 
+            <!-- macOS manual entry -->
+            <div id="setup-macos" style="display:none">
+                <div class="device-badge">🍎 macOS Detected</div>
+                <h2>Enter Your Mac's Info</h2>
+                <p class="setup-desc">Click the <strong>&#xF8FF; menu</strong> (top-left) &rarr; <strong>About This Mac</strong>, then fill in the fields below.</p>
+
+                <div class="about-mac-card">
+                    <div class="about-mac-card-header">🍎 About This Mac — what to look for</div>
+                    <div class="about-mac-card-row"><span class="amc-key">MacBook Pro / iMac / Mac mini…</span><span class="amc-val">MODEL</span></div>
+                    <div class="about-mac-card-row"><span class="amc-key">Chip / Processor</span><span class="amc-val">CHIP</span></div>
+                    <div class="about-mac-card-row"><span class="amc-key">Memory</span><span class="amc-val">MEMORY</span></div>
+                    <div class="about-mac-card-row"><span class="amc-key">macOS Sequoia / Sonoma…</span><span class="amc-val">VERSION</span></div>
+                </div>
+
+                <div class="mac-fields">
+                    <div class="mac-field">
+                        <label>Mac Model</label>
+                        <input type="text" id="macModel" placeholder="e.g. MacBook Pro 14-inch, 2023">
+                    </div>
+                    <div class="mac-field">
+                        <label>Chip / Processor</label>
+                        <input type="text" id="macChip" placeholder="e.g. Apple M2 Pro">
+                    </div>
+                    <div class="mac-field">
+                        <label>Memory</label>
+                        <input type="text" id="macMemory" placeholder="e.g. 16 GB">
+                    </div>
+                    <div class="mac-field">
+                        <label>macOS Version</label>
+                        <input type="text" id="macVersion" placeholder="e.g. macOS Sequoia 15.4">
+                    </div>
+                </div>
+
+                <button class="button" id="btnMacContinue">Continue to Speed Test &rarr;</button>
+                <button class="btn-link" id="btnSkipMac">Skip &rarr; proceed without hardware info</button>
+            </div>
+
             <!-- macOS / Linux path -->
             <div id="setup-shell" style="display:none">
                 <div class="device-badge" id="setup-shell-badge">💻 Device Detected</div>
@@ -567,7 +650,7 @@
             </div>
 
             <div class="hw-banner" id="hwBanner" style="display:none">
-                ✅ <span>System info collected via PowerShell — full hardware details will be included.</span>
+                ✅ <span id="hwBannerText">System info collected — full hardware details will be included.</span>
             </div>
 
             <form id="speedTestForm">
@@ -648,44 +731,27 @@
 
             if (platform === 'Windows') {
                 document.getElementById('setup-windows').style.display = 'block';
+                document.getElementById('setup-macos').style.display   = 'none';
                 document.getElementById('setup-shell').style.display   = 'none';
                 document.getElementById('setup-other').style.display   = 'none';
-            } else if (platform === 'macOS' || platform === 'Linux') {
-                const shellBadges = { macOS: '🍎 macOS Detected', Linux: '🐧 Linux Detected' };
-                document.getElementById('setup-shell-badge').textContent = shellBadges[platform] || '💻 Device Detected';
-
+            } else if (platform === 'macOS') {
+                document.getElementById('setup-windows').style.display = 'none';
+                document.getElementById('setup-macos').style.display   = 'block';
+                document.getElementById('setup-shell').style.display   = 'none';
+                document.getElementById('setup-other').style.display   = 'none';
+            } else if (platform === 'Linux') {
+                document.getElementById('setup-shell-badge').textContent = '🐧 Linux Detected';
                 const s1 = document.getElementById('shellStep1Body');
                 const s2 = document.getElementById('shellStep2Body');
-
-                if (platform === 'macOS') {
-                    const curlCmd = 'bash <(curl -fsSL https://orlando-g26.github.io/Hardware-Inspection-tool/run-speedtest.sh)';
-                    s1.innerHTML = `
-                        <div class="step-title">Copy this command</div>
-                        <div class="step-detail">
-                            <code>${curlCmd}</code><br>
-                            <button class="copy-btn" id="btnCopyCmd">Copy</button>
-                        </div>`;
-                    s2.innerHTML = `
-                        <div class="step-title">Open Terminal and paste</div>
-                        <div class="step-detail">Press <strong>Return</strong> to run.</div>`;
-                    document.getElementById('btnCopyCmd').addEventListener('click', () => {
-                        navigator.clipboard.writeText(curlCmd).then(() => {
-                            const b = document.getElementById('btnCopyCmd');
-                            b.textContent = 'Copied!';
-                            setTimeout(() => { b.textContent = 'Copy'; }, 2000);
-                        });
-                    });
-                } else {
-                    s1.innerHTML = `
-                        <div class="step-title">Download the script</div>
-                        <div class="step-detail">Save it to your Downloads folder.</div>
-                        <a href="run-speedtest.sh" download class="download-btn">&#x2B07; Download Script</a>`;
-                    s2.innerHTML = `
-                        <div class="step-title">Run it in Terminal</div>
-                        <div class="step-detail">Open Terminal and paste:<br><code>bash ~/Downloads/run-speedtest.sh</code></div>`;
-                }
-
+                s1.innerHTML = `
+                    <div class="step-title">Download the script</div>
+                    <div class="step-detail">Save it to your Downloads folder.</div>
+                    <a href="run-speedtest.sh" download class="download-btn">&#x2B07; Download Script</a>`;
+                s2.innerHTML = `
+                    <div class="step-title">Run it in Terminal</div>
+                    <div class="step-detail">Open Terminal and paste:<br><code>bash ~/Downloads/run-speedtest.sh</code></div>`;
                 document.getElementById('setup-windows').style.display = 'none';
+                document.getElementById('setup-macos').style.display   = 'none';
                 document.getElementById('setup-shell').style.display   = 'block';
                 document.getElementById('setup-other').style.display   = 'none';
             } else {
@@ -702,6 +768,7 @@
                 document.getElementById('setup-badge').textContent = badges[platform] || '💻 Device Detected';
                 document.getElementById('setup-desc').textContent  = descs[platform]  || 'Your device info will be collected automatically from the browser.';
                 document.getElementById('setup-windows').style.display = 'none';
+                document.getElementById('setup-macos').style.display   = 'none';
                 document.getElementById('setup-shell').style.display   = 'none';
                 document.getElementById('setup-other').style.display   = 'block';
             }
@@ -714,6 +781,26 @@
         });
 
         document.getElementById('btnSkipShell').addEventListener('click', () => {
+            showScreen('screen-test', 2);
+        });
+
+        document.getElementById('btnMacContinue').addEventListener('click', () => {
+            const model   = document.getElementById('macModel').value.trim();
+            const chip    = document.getElementById('macChip').value.trim();
+            const memory  = document.getElementById('macMemory').value.trim();
+            const version = document.getElementById('macVersion').value.trim();
+            if (model)   _hw.model    = model;
+            if (chip)    _hw.cpu      = chip;
+            if (memory)  _hw.ram      = memory;
+            if (version) _hw.os       = version;
+            if (chip || memory || version) {
+                document.getElementById('hwBannerText').textContent = 'Mac info entered manually — hardware details will be included.';
+                document.getElementById('hwBanner').style.display = 'flex';
+            }
+            showScreen('screen-test', 2);
+        });
+
+        document.getElementById('btnSkipMac').addEventListener('click', () => {
             showScreen('screen-test', 2);
         });
 
