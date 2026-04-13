@@ -410,7 +410,6 @@
         <div class="step-indicator">
             <div class="step-dot" id="dot-0"></div>
             <div class="step-dot" id="dot-1"></div>
-            <div class="step-dot" id="dot-2"></div>
         </div>
 
         <!-- ── Screen 1: Welcome ── -->
@@ -499,7 +498,7 @@
             </div>
 
             <div class="hw-banner" id="hwBanner" style="display:none">
-                ✅ <span>System info collected — hardware details will be included.</span>
+                ✅ <span>System info collected via PowerShell — full hardware details will be included.</span>
             </div>
 
             <form id="speedTestForm">
@@ -542,10 +541,10 @@
 
         // ---- Step indicator ----
         function setStep(index) {
-            [0, 1, 2].forEach(i => {
+            [0, 1].forEach(i => {
                 const d = document.getElementById('dot-' + i);
                 d.classList.remove('active', 'done');
-                if (i < index)       d.classList.add('done');
+                if (i < index)        d.classList.add('done');
                 else if (i === index) d.classList.add('active');
             });
         }
@@ -574,40 +573,9 @@
             return 'Unknown';
         }
 
-        // ---- Welcome: Get Started ----
-        document.getElementById('btnGetStarted').addEventListener('click', async () => {
-            const platform = await detectPlatform();
-            showScreen('screen-setup', 1);
-
-            if (platform === 'Windows') {
-                document.getElementById('setup-windows').style.display = 'block';
-            } else {
-                const icons   = { Android: '📱', iOS: '📱', macOS: '🍎', Linux: '🐧' };
-                const badges  = {
-                    Android: '🤖 Android Detected',
-                    iOS:     '🍎 iPhone / iPad Detected',
-                    macOS:   '🍎 macOS Detected',
-                    Linux:   '🐧 Linux Detected',
-                };
-                const descs   = {
-                    Android: 'Your Android device was detected. Network and browser info will be collected automatically.',
-                    iOS:     'Your iPhone or iPad was detected. Network and browser info will be collected automatically.',
-                    macOS:   'Your Mac was detected. Network and browser info will be collected automatically.',
-                    Linux:   'Your Linux machine was detected. Network and browser info will be collected automatically.',
-                };
-                document.getElementById('other-icon').textContent  = icons[platform]  || '💻';
-                document.getElementById('other-badge').textContent = badges[platform] || '💻 Device Detected';
-                document.getElementById('other-desc').textContent  = descs[platform]  || 'Your device info will be collected automatically from the browser.';
-                document.getElementById('setup-other').style.display = 'block';
-            }
-        });
-
-        document.getElementById('btnSkipSetup').addEventListener('click', () => {
-            showScreen('screen-test', 2);
-        });
-
-        document.getElementById('btnProceedOther').addEventListener('click', () => {
-            showScreen('screen-test', 2);
+        // ---- Welcome: Get Started — skip setup, detect everything in browser ----
+        document.getElementById('btnGetStarted').addEventListener('click', () => {
+            showScreen('screen-test', 1);
         });
 
         // ---- Hardware data passed via URL params by run-speedtest.ps1 ----
@@ -624,7 +592,7 @@
                 if (Object.keys(_hw).length > 0) {
                     document.getElementById('hwBanner').style.display = 'flex';
                 }
-                showScreen('screen-test', 2);
+                showScreen('screen-test', 1);
             } else {
                 showScreen('screen-welcome', 0);
             }
