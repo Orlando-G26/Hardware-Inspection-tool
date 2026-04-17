@@ -382,6 +382,31 @@
             letter-spacing: 0.05em;
         }
 
+        /* ── Windows option tabs ── */
+        .win-options {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .win-option-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--oxford);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--oxford);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s, color 0.2s;
+        }
+        .win-option-btn.active {
+            background: var(--oxford);
+            color: var(--white);
+        }
+        .win-option-btn:hover:not(.active) { background: var(--platinum); }
+
         /* ── Shared buttons ── */
         .button {
             width: 100%;
@@ -534,33 +559,73 @@
             <!-- Windows path -->
             <div id="setup-windows" style="display:none">
                 <div class="device-badge">🪟 Windows Detected</div>
-                <h2>Get Accurate Hardware Info</h2>
-                <p class="setup-desc">Run our lightweight collector script to include exact CPU model, RAM, and network adapter details in your results.</p>
-                <div class="setup-steps">
-                    <div class="setup-step">
-                        <div class="step-num">1</div>
-                        <div class="step-body">
-                            <div class="step-title">Download the launcher</div>
-                            <div class="step-detail">Save it anywhere on your PC. If your browser warns, click <strong>Keep</strong>.</div>
-                            <a href="run-speedtest.bat" download class="download-btn">&#x2B07; Download Launcher</a>
-                        </div>
-                    </div>
-                    <div class="setup-step">
-                        <div class="step-num">2</div>
-                        <div class="step-body">
-                            <div class="step-title">Double-click to run</div>
-                            <div class="step-detail">If Windows SmartScreen appears, click <strong>More info</strong> &rarr; <strong>Run anyway</strong>.</div>
-                        </div>
-                    </div>
-                    <div class="setup-step">
-                        <div class="step-num">3</div>
-                        <div class="step-body">
-                            <div class="step-title">This page reopens automatically</div>
-                            <div class="step-detail">The script brings you back here with full hardware details ready.</div>
-                        </div>
-                    </div>
+                <h2>Get Your Hardware Info</h2>
+                <p class="setup-desc">Choose how you'd like to provide your system details.</p>
+                <div class="win-options">
+                    <button class="win-option-btn active" id="btnWinOptAuto">Option 1: Auto-detect</button>
+                    <button class="win-option-btn" id="btnWinOptManual">Option 2: Enter manually</button>
                 </div>
-                <button class="btn-link" id="btnSkipSetup">Skip &rarr; proceed with browser info only</button>
+
+                <!-- Auto-detect -->
+                <div id="win-option-auto">
+                    <div class="setup-steps">
+                        <div class="setup-step">
+                            <div class="step-num">1</div>
+                            <div class="step-body">
+                                <div class="step-title">Download the launcher</div>
+                                <div class="step-detail">Save it anywhere on your PC. If your browser warns, click <strong>Keep</strong>.</div>
+                                <a href="run-speedtest.bat" download class="download-btn">&#x2B07; Download Launcher</a>
+                            </div>
+                        </div>
+                        <div class="setup-step">
+                            <div class="step-num">2</div>
+                            <div class="step-body">
+                                <div class="step-title">Double-click to run</div>
+                                <div class="step-detail">If Windows SmartScreen appears, click <strong>More info</strong> &rarr; <strong>Run anyway</strong>.</div>
+                            </div>
+                        </div>
+                        <div class="setup-step">
+                            <div class="step-num">3</div>
+                            <div class="step-body">
+                                <div class="step-title">This page reopens automatically</div>
+                                <div class="step-detail">The script brings you back here with full hardware details ready.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-link" id="btnSkipSetup">Skip &rarr; proceed with browser info only</button>
+                </div>
+
+                <!-- Manual entry -->
+                <div id="win-option-manual" style="display:none">
+                    <p class="setup-desc">Press <strong>Win + Pause</strong> or go to <strong>Settings &rarr; System &rarr; About</strong>, then fill in the fields below.</p>
+                    <div class="about-mac-card">
+                        <div class="about-mac-card-header">🪟 Settings &rarr; System &rarr; About — what to look for</div>
+                        <div class="about-mac-card-row"><span class="amc-key">Device name / Model</span><span class="amc-val">MODEL</span></div>
+                        <div class="about-mac-card-row"><span class="amc-key">Processor</span><span class="amc-val">CPU</span></div>
+                        <div class="about-mac-card-row"><span class="amc-key">Installed RAM</span><span class="amc-val">RAM</span></div>
+                        <div class="about-mac-card-row"><span class="amc-key">Windows edition / Version</span><span class="amc-val">VERSION</span></div>
+                    </div>
+                    <div class="mac-fields">
+                        <div class="mac-field">
+                            <label>PC Model</label>
+                            <input type="text" id="winModel" placeholder="e.g. Dell Latitude 5520">
+                        </div>
+                        <div class="mac-field">
+                            <label>Processor</label>
+                            <input type="text" id="winCpu" placeholder="e.g. Intel Core i7-1165G7">
+                        </div>
+                        <div class="mac-field">
+                            <label>Installed RAM</label>
+                            <input type="text" id="winRam" placeholder="e.g. 16 GB">
+                        </div>
+                        <div class="mac-field">
+                            <label>Windows Version</label>
+                            <input type="text" id="winVersion" placeholder="e.g. Windows 11 Pro 22H2">
+                        </div>
+                    </div>
+                    <button class="button" id="btnWinManualContinue">Continue to Speed Test &rarr;</button>
+                    <button class="btn-link" id="btnSkipWinManual">Skip &rarr; proceed without hardware info</button>
+                </div>
             </div>
 
             <!-- macOS manual entry -->
@@ -750,8 +815,7 @@
     <script>
         // ===== CONFIGURATION (IT Admin) =====
         const CONFIG = {
-            webhookURL:       'https://default15243be52db34c69a4a38df1255d9b.b2.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/5493e418071d44da88d286e237366a4f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=IgJGOKEQeOd8va1AqBuaghjLOYBJwlUegmYUEdczv-E',
-            libreSpeedServer: 'https://librespeed.org',
+            webhookURL: 'https://default15243be52db34c69a4a38df1255d9b.b2.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/5493e418071d44da88d286e237366a4f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=IgJGOKEQeOd8va1AqBuaghjLOYBJwlUegmYUEdczv-E',
         };
         // ===== END CONFIGURATION =====
 
@@ -869,6 +933,40 @@
         });
 
         document.getElementById('btnSkipMac').addEventListener('click', () => {
+            showScreen('screen-test', 2);
+        });
+
+        document.getElementById('btnWinOptAuto').addEventListener('click', () => {
+            document.getElementById('win-option-auto').style.display   = 'block';
+            document.getElementById('win-option-manual').style.display = 'none';
+            document.getElementById('btnWinOptAuto').classList.add('active');
+            document.getElementById('btnWinOptManual').classList.remove('active');
+        });
+
+        document.getElementById('btnWinOptManual').addEventListener('click', () => {
+            document.getElementById('win-option-auto').style.display   = 'none';
+            document.getElementById('win-option-manual').style.display = 'block';
+            document.getElementById('btnWinOptManual').classList.add('active');
+            document.getElementById('btnWinOptAuto').classList.remove('active');
+        });
+
+        document.getElementById('btnWinManualContinue').addEventListener('click', () => {
+            const model   = document.getElementById('winModel').value.trim();
+            const cpu     = document.getElementById('winCpu').value.trim();
+            const ram     = document.getElementById('winRam').value.trim();
+            const version = document.getElementById('winVersion').value.trim();
+            if (model)   _hw.model = model;
+            if (cpu)     _hw.cpu   = cpu;
+            if (ram)     _hw.ram   = ram;
+            if (version) _hw.os    = version;
+            if (model || cpu || ram || version) {
+                document.getElementById('hwBannerText').textContent = 'Windows info entered manually — hardware details will be included.';
+                document.getElementById('hwBanner').style.display = 'flex';
+            }
+            showScreen('screen-test', 2);
+        });
+
+        document.getElementById('btnSkipWinManual').addEventListener('click', () => {
             showScreen('screen-test', 2);
         });
 
